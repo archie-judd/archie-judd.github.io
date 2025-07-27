@@ -184,7 +184,7 @@ function generateFeaturedPost(post, postContent, isFirst = false) {
 function generatePostNavigation(post, posts) {
   const currentIndex = posts.findIndex((p) => p.url === post.url);
   let navHTML =
-    '<div class="post-nav-links" style="display: flex; justify-content: space-between; width: 100%; position: relative; margin-bottom: 60px;">';
+    '<div class="post-nav-links" style="display: flex; justify-content: space-between; width: 100%; position: relative; margin-bottom: 20px; height: 50px;">';
 
   let leftButton = "";
   if (currentIndex > 0) {

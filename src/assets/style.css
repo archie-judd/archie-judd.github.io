@@ -115,10 +115,19 @@ body {
   }
 }
 
+/* Add this to your existing @media (max-width: 480px) section */
 @media (max-width: 480px) {
+  body {
+    font-size: 18px; /* Reduced from 20px */
+  }
+
   .header-nav ul {
     gap: 15px;
     font-size: 0.9rem;
+  }
+
+  .footer-content {
+    gap: 25px;
   }
 }
 
