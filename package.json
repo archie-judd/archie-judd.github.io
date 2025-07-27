@@ -1,0 +1,28 @@
+{
+  "type": "module",
+  "name": "personal-blog",
+  "version": "1.0.0",
+  "description": "Static blog generator",
+  "main": "build.js",
+  "scripts": {
+    "build": "node build.js",
+    "serve": "npx serve docs",
+    "dev": "nodemon --exec 'npm run build && npm run serve' --ext js,yml,css,html,md --watch build.js --watch src/ ",
+    "clean": "rm -rf docs"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "marked": "^9.1.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "serve": "^14.2.1"
+  },
+  "keywords": [
+    "blog",
+    "static-site-generator",
+    "markdown"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
