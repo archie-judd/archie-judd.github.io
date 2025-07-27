@@ -8,10 +8,10 @@ body {
   line-height: 1.7;
   color: #4a453f;
   background-color: #faf9f7;
-  font-size: 18px;
+  font-size: 20px;
 }
 .container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 40px 20px;
 }
@@ -82,7 +82,7 @@ body {
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 .header-nav a:hover {

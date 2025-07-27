@@ -287,7 +287,7 @@ function generateCategoriesPage(categorizedPosts) {
       const year = date.getFullYear();
       categoriesHTML += `
         <div style="margin-bottom: 12px; padding-left: 20px;">
-          <span style="color: #a0907d; font-size: 1.2rem;">${year} ${month} ${day}</span> &nbsp;&nbsp;-&nbsp;&nbsp;
+          <span style="color: #a0907d; font-size: 1.2rem;">${year}&nbsp;&nbsp;&nbsp;${month}&nbsp;&nbsp;&nbsp;${day}</span> &nbsp;&nbsp;-&nbsp;&nbsp;
           <a href="/${post.url}/" style="color: #4a453f; text-decoration: none;">${post.title}</a>
         </div>
       `;
@@ -320,6 +320,7 @@ function generateHeader(template, data, activeNav = null) {
   console.log("Generating header...");
 
   const navHTML = generateNavigation(activeNav);
+  build;
   const html = template
     .replace(/\{\{SITE_TITLE\}\}/g, data.title)
     .replace(/\{\{NAVIGATION\}\}/g, navHTML);
@@ -416,7 +417,7 @@ async function buildAboutPage(templates, data) {
     : "<p>About content could not be loaded.</p>";
 
   const headHTML = generateHead(templates.head, data, "../assets");
-  const headerHTML = generateHeader(templates.header, data, null);
+  const headerHTML = generateHeader(templates.header, data, "about");
   const footerHTML = generateFooter(templates.footer, data);
   const html = templates.about
     .replace(/\{\{HEAD\}\}/g, headHTML)
