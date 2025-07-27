@@ -186,12 +186,6 @@ img {
   line-height: 1.8;
   max-width: 100%;
 }
-.full-post .post-content img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-}
 
 .full-post .post-content h1,
 .full-post .post-content h2,
@@ -299,6 +293,25 @@ img {
     gap: 25px;
   }
 }
+
+/* Post images */
+.post-image {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.post-image img {
+  max-width: 100%;
+  height: auto;
+}
+
+.post-image figcaption {
+  font-size: 1.2rem;
+  color: #a0907d;
+  margin-top: 8px;
+  font-style: italic;
+}
+
 /* Post separator styles */
 .post-separator {
   border: none;
