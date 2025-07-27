@@ -306,12 +306,11 @@ img {
 }
 
 .post-image figcaption {
-  display: block;
-  font-size: 1.2rem;
-  color: #b8a898;
-  margin-top: 8px;
-  font-style: italic;
-  text-align: center;
+  display: block !important;
+  font-style: italic !important;
+  color: #a0907d !important;
+  font-size: 0.9rem !important;
+  text-align: center !important;
 }
 
 /* Post separator styles */
