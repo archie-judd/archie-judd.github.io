@@ -5,13 +5,8 @@ about:
   filepath: src/content/about.md
 
 posts:
-  - date: 2024-12-16
-    title: Chapter 2 - The Mail
-    url: posts/the-mail
-    subtitle: Lorem ipsum dolor sit amet.
-    filepath: src/content/posts/the-mail.md
-  - date: 2024-12-15
-    title: Chapter 1 - The Period
-    url: posts/the-period
-    subtitle: Lorem ipsum dolor sit amet.
-    filepath: src/content/posts/the-period.md
+  - date: 2025-07-28
+    title: Kieffer / Van Gogh
+    url: posts/kieffer-van-gogh
+    subtitle: At the Royal Academy
+    filepath: src/content/posts/kieffer-van-gogh.md
