@@ -6,7 +6,8 @@ about:
 
 posts:
   - date: 2025-07-28
-    title: Kieffer / Van Gogh
+    title: Kieffer / Van Gogh at the Royal Academy
     url: posts/kieffer-van-gogh
-    subtitle: At the Royal Academy
+    subtitle: A very short review
+    category: Review
     filepath: src/content/posts/kieffer-van-gogh.md
