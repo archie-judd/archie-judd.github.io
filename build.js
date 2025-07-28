@@ -169,37 +169,25 @@ function generateFeaturedPost(post, postContent, isFirst = false) {
 
 function generatePostNavigation(post, posts) {
   const currentIndex = posts.findIndex((p) => p.url === post.url);
-  let navHTML =
-    '<div class="post-nav-links" style="display: flex; justify-content: space-between; width: 100%; position: relative; margin-bottom: 20px; height: 50px;">';
+  let navHTML = '<div class="post-nav-container">';
 
-  let leftButton = "";
   if (currentIndex > 0) {
     const prevPost = posts[currentIndex - 1];
-    leftButton = `
-      <a href="/${prevPost.url}/" class="nav-button">
-        Previous 
-      </a>
+    navHTML += `
+      <div class="post-nav-left">
+        <a href="/${prevPost.url}/" class="nav-button">Previous</a>
+      </div>
     `;
   }
 
-  let rightButton = "";
   if (currentIndex < posts.length - 1) {
     const nextPost = posts[currentIndex + 1];
-    rightButton = `
-      <a href="/${nextPost.url}/" class="nav-button">
-        Next 
-      </a>
+    navHTML += `
+      <div class="post-nav-right">
+        <a href="/${nextPost.url}/" class="nav-button">Next</a>
+      </div>
     `;
   }
-
-  navHTML += `
-    <div style="position: absolute; left: 25%; transform: translateX(-50%);">
-      ${leftButton}
-    </div>
-    <div style="position: absolute; right: 25%; transform: translateX(50%);">
-      ${rightButton}
-    </div>
-  `;
 
   navHTML += "</div>";
   return navHTML;
@@ -210,7 +198,7 @@ function generateArchivePage(postsByYear) {
   const sortedYears = Object.keys(postsByYear).sort((a, b) => b - a);
 
   sortedYears.forEach((year) => {
-    archiveHTML += `<div class="archive-year"><h2 style="font-size: 1.5rem; margin: 20px 0 10px 0; color: #3d362e;">${year}</h2>`;
+    archiveHTML += `<div class="archive-year"><h2>${year}</h2>`;
 
     const months = Object.keys(postsByYear[year]);
     months.sort((a, b) => {
@@ -226,25 +214,27 @@ function generateArchivePage(postsByYear) {
       monthPosts.forEach((post, index) => {
         const date = new Date(post.date);
         const day = date.getDate().toString().padStart(2, "0");
+        const isFirstInMonth = index === 0;
 
-        if (index === 0) {
+        archiveHTML += `<div class="archive-entry">`;
+
+        if (isFirstInMonth) {
           archiveHTML += `
-            <div style="margin-bottom: 12px; padding-left: 20px; display: flex; align-items: baseline;">
-              <h3 style="font-size: 1.3rem; color: #6b5e4f; min-width: 100px;">${month}</h3>
-              <div>
-                <span style="color: #a0907d; font-size: 1.2rem;">${day}</span> &nbsp;&nbsp;-&nbsp;&nbsp;
-                <a href="/${post.url}/" style="color: #4a453f; text-decoration: none;">${post.title}</a>
-              </div>
+            <h3 class="archive-month-header">${month}</h3>
+            <div>
+              <span class="archive-date">${day}</span> &nbsp;&nbsp;-&nbsp;&nbsp;
+              <a href="/${post.url}/" class="archive-link">${post.title}</a>
             </div>
           `;
         } else {
           archiveHTML += `
-            <div style="margin-bottom: 12px; padding-left: 120px;">
-              <span style="color: #a0907d; font-size: 1.2rem;">${day}</span> &nbsp;&nbsp;-&nbsp;&nbsp;
-              <a href="/${post.url}/" style="color: #4a453f; text-decoration: none;">${post.title}</a>
-            </div>
+            <div class="archive-month-spacer"></div>
+            <span class="archive-date">${day}</span> &nbsp;&nbsp;-&nbsp;&nbsp;
+            <a href="/${post.url}/" class="archive-link">${post.title}</a>
           `;
         }
+
+        archiveHTML += "</div>";
       });
 
       archiveHTML += "</div>";
@@ -277,7 +267,6 @@ function generateHeader(template, data, activeNav = null) {
   console.log("Generating header...");
 
   const navHTML = generateNavigation(activeNav);
-  build;
   const html = template
     .replace(/\{\{SITE_TITLE\}\}/g, data.title)
     .replace(/\{\{NAVIGATION\}\}/g, navHTML);
@@ -313,10 +302,10 @@ async function buildHomePage(templates, data) {
       }
     }
   }
-
   const headHTML = generateHead(templates.head, data, "../assets");
   const headerHTML = generateHeader(templates.header, data, "home");
   const footerHTML = generateFooter(templates.footer, data);
+
   const html = templates.index
     .replace(/\{\{HEAD\}\}/g, headHTML)
     .replace(/\{\{HEADER\}\}/g, headerHTML)
@@ -342,10 +331,10 @@ async function buildPostPages(templates, data) {
       console.warn(`Could not load content for ${post.url}`);
       continue;
     }
-
     const postContentHTML = marked.parse(content);
     const postNavigationHTML = generatePostNavigation(post, data.posts);
     const postDate = formatDate(post.date);
+
     const html = templates.post
       .replace(/\{\{HEAD\}\}/g, headHTML)
       .replace(/\{\{HEADER\}\}/g, headerHTML)
@@ -372,10 +361,10 @@ async function buildAboutPage(templates, data) {
   const aboutContent = content
     ? marked.parse(content)
     : "<p>About content could not be loaded.</p>";
-
   const headHTML = generateHead(templates.head, data, "../assets");
   const headerHTML = generateHeader(templates.header, data, "about");
   const footerHTML = generateFooter(templates.footer, data);
+
   const html = templates.about
     .replace(/\{\{HEAD\}\}/g, headHTML)
     .replace(/\{\{HEADER\}\}/g, headerHTML)
@@ -392,7 +381,6 @@ async function buildArchivePage(templates, data) {
 
   const postsByYear = groupPostsByYear(data.posts);
   const archiveHTML = generateArchivePage(postsByYear);
-
   const headHTML = generateHead(templates.head, data, "../assets");
   const headerHTML = generateHeader(templates.header, data, "archive");
   const footerHTML = generateFooter(templates.footer, data);
