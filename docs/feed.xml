@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title><![CDATA[Archie Judd]]></title>
+    <description><![CDATA[Archie Judd - Archie Judd's personal website]]></description>
+    <link>https://archie-judd.github.io</link>
+    <atom:link href="https://archie-judd.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <language>en-us</language>
+    <managingEditor>noreply@archie-judd.github.io (Archie Judd)</managingEditor>
+    <webMaster>noreply@archie-judd.github.io (Archie Judd)</webMaster>
+    <lastBuildDate>Mon, 28 Jul 2025 21:10:04 GMT</lastBuildDate>
+    <pubDate>Mon, 28 Jul 2025 00:00:00 GMT</pubDate>
+    <ttl>60</ttl>
+    <item>
+      <title><![CDATA[Kieffer / Van Gogh at the Royal Academy]]></title>
+      <description><![CDATA[The exhibition is at the back of the RA, in 3 rooms. Each room has one or two enormous Kieffer canvasses, and a handful of his smaller works. There are a few Van Goghs, but they feel like they're there to provide context rather than take the spotlight. The contrast between the two is stark. Kieffer's canvasses are imposing, textured, and opulent; the Van Gogh's works are much more subdued. Both carry a sense of solitude, and evoke the magic of the landscapes they depict.]]></description>
+      <link>https://archie-judd.github.io/posts/kieffer-van-gogh/</link>
+      <guid>https://archie-judd.github.io/posts/kieffer-van-gogh/</guid>
+      <pubDate>Mon, 28 Jul 2025 00:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

@@ -13,6 +13,7 @@ const CONFIG = {
   HOME_POSTS_COUNT: 5,
   EXCERPT_SENTENCE_THRESHOLD: 0.6,
   OUTPUT_DIR: "docs",
+  RSS_MAX_POSTS: 20,
 };
 
 async function loadTemplates() {
@@ -63,6 +64,8 @@ async function loadBlogData() {
     const data = {
       title: yamlData.title,
       author: yamlData.author,
+      description: `${yamlData.title} - ${yamlData.author}'s personal website`,
+      url: yamlData.url,
       about: { filepath: yamlData.about.filepath },
       posts,
     };
@@ -87,6 +90,10 @@ async function loadContent(filepath) {
 function formatDate(dateString) {
   const options = { year: "numeric", month: "long", day: "numeric" };
   return new Date(dateString).toLocaleDateString("en-US", options);
+}
+
+function formatRSSDate(date) {
+  return new Date(date).toUTCString();
 }
 
 function createExcerpt(content, maxLength = CONFIG.EXCERPT_MAX_LENGTH) {
@@ -115,6 +122,15 @@ function createExcerpt(content, maxLength = CONFIG.EXCERPT_MAX_LENGTH) {
   // Fallback to word boundary
   const lastSpace = truncated.lastIndexOf(" ");
   return truncated.substring(0, lastSpace) + "...";
+}
+
+function escapeXml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 function groupPostsByYear(posts) {
@@ -246,6 +262,51 @@ function generateArchivePage(postsByYear) {
   return archiveHTML;
 }
 
+async function generateRSSFeed(data) {
+  console.log("Generating RSS feed...");
+
+  const postsForRSS = data.posts.slice(0, CONFIG.RSS_MAX_POSTS);
+  let rssItems = "";
+
+  for (const post of postsForRSS) {
+    const content = await loadContent(post.filepath);
+    const description = content ? createExcerpt(content, 500) : post.subtitle;
+    const postUrl = `${data.url}/${post.url}/`;
+
+    rssItems += `
+    <item>
+      <title><![CDATA[${post.title}]]></title>
+      <description><![CDATA[${description}]]></description>
+      <link>${postUrl}</link>
+      <guid>${postUrl}</guid>
+      <pubDate>${formatRSSDate(post.date)}</pubDate>
+    </item>`;
+  }
+
+  const lastBuildDate = formatRSSDate(new Date());
+  const mostRecentPostDate =
+    data.posts.length > 0 ? formatRSSDate(data.posts[0].date) : lastBuildDate;
+  const email = `noreply@${data.url.replace(/https?:\/\//, "").replace(/\/$/, "")}`;
+
+  const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title><![CDATA[${data.title}]]></title>
+    <description><![CDATA[${data.description}]]></description>
+    <link>${data.url}</link>
+    <atom:link href="${data.url}/feed.xml" rel="self" type="application/rss+xml"/>
+    <language>en-us</language>
+    <managingEditor>${email} (${data.author})</managingEditor>
+    <webMaster>${email} (${data.author})</webMaster>
+    <lastBuildDate>${lastBuildDate}</lastBuildDate>
+    <pubDate>${mostRecentPostDate}</pubDate>
+    <ttl>60</ttl>${rssItems}
+  </channel>
+</rss>`;
+
+  return rssXml;
+}
+
 async function ensureDir(dirPath) {
   try {
     await promises.mkdir(dirPath, { recursive: true });
@@ -260,7 +321,9 @@ function generateHead(template, data, asset_dir) {
   console.log("Generating head...");
   return template
     .replace(/\{\{TITLE\}\}/g, data.title)
-    .replace(/\{\{ASSETS_DIR\}\}/g, asset_dir);
+    .replace(/\{\{SITE_TITLE\}\}/g, data.title)
+    .replace(/\{\{ASSETS_DIR\}\}/g, asset_dir)
+    .replace(/\{\{RSS_URL\}\}/g, "/feed.xml");
 }
 
 function generateHeader(template, data, activeNav = null) {
@@ -279,7 +342,8 @@ function generateFooter(template, data) {
 
   const html = template
     .replace(/\{\{CURRENT_YEAR\}\}/g, new Date().getFullYear())
-    .replace(/\{\{AUTHOR\}\}/g, data.author);
+    .replace(/\{\{AUTHOR\}\}/g, data.author)
+    .replace(/\{\{RSS_URL\}\}/g, "/feed.xml");
 
   return html;
 }
@@ -396,6 +460,14 @@ async function buildArchivePage(templates, data) {
   console.log("Built archive/index.html");
 }
 
+async function buildRSSFeed(data) {
+  console.log("Building RSS feed...");
+
+  const rssXml = await generateRSSFeed(data);
+  await promises.writeFile(`${CONFIG.OUTPUT_DIR}/feed.xml`, rssXml);
+  console.log("Built feed.xml");
+}
+
 async function copyDirectory(src, dest) {
   await promises.access(src);
   await ensureDir(dest);
@@ -430,11 +502,12 @@ async function build() {
   await buildPostPages(templates, data);
   await buildAboutPage(templates, data);
   await buildArchivePage(templates, data);
+  await buildRSSFeed(data);
   await copyDirectory("src/assets", `${CONFIG.OUTPUT_DIR}/assets`);
 
   console.log("Blog build completed successfully!");
   console.log(
-    `Generated ${data.posts.length + 4} pages in ${CONFIG.OUTPUT_DIR}/`,
+    `Generated ${data.posts.length + 5} pages in ${CONFIG.OUTPUT_DIR}/`,
   );
 }
 

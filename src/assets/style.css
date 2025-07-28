@@ -344,6 +344,24 @@ img {
   margin: 0;
 }
 
+.rss-link {
+  color: #6b5e4f;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.rss-link:hover {
+  color: #3d362e;
+  text-decoration: underline;
+}
+
+.footer-copyright p {
+  color: #a0907d;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
   .container {
