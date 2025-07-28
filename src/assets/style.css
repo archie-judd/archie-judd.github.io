@@ -402,6 +402,10 @@ img {
     font-size: 0.9rem;
   }
 
+  .post-image figcaption {
+    font-size: 0.9rem !important;
+  }
+
   .footer-content {
     gap: 25px;
   }
