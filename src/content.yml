@@ -9,11 +9,9 @@ posts:
     title: Chapter 2 - The Mail
     url: posts/the-mail
     subtitle: Lorem ipsum dolor sit amet.
-    category: A Tale of Two Cities
     filepath: src/content/posts/the-mail.md
   - date: 2024-12-15
     title: Chapter 1 - The Period
     url: posts/the-period
     subtitle: Lorem ipsum dolor sit amet.
-    category: A Tale of Two Cities
     filepath: src/content/posts/the-period.md

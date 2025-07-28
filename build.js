@@ -23,7 +23,6 @@ async function loadTemplates() {
     "index.html",
     "post.html",
     "archive.html",
-    "categories.html",
     "about.html",
   ];
 
@@ -54,7 +53,6 @@ async function loadBlogData() {
       title: post.title,
       subtitle: post.subtitle || "",
       date: new Date(post.date),
-      category: post.category,
       filepath: post.filepath,
       url: post.url,
     }));
@@ -136,22 +134,10 @@ function groupPostsByYear(posts) {
   return postsByYear;
 }
 
-function groupPostsByCategory(posts) {
-  const categorizedPosts = {};
-  posts.forEach((post) => {
-    if (!categorizedPosts[post.category]) {
-      categorizedPosts[post.category] = [];
-    }
-    categorizedPosts[post.category].push(post);
-  });
-  return categorizedPosts;
-}
-
 function generateNavigation(activeNav = null) {
   const navItems = [
     { path: "/", label: "Home", key: "home" },
     { path: "/archive/", label: "Archive", key: "archive" },
-    { path: "/categories/", label: "Categories", key: "categories" },
     { path: "/about/", label: "About", key: "about" },
   ];
 
@@ -268,35 +254,6 @@ function generateArchivePage(postsByYear) {
   });
 
   return archiveHTML;
-}
-
-function generateCategoriesPage(categorizedPosts) {
-  let categoriesHTML = "";
-  const sortedCategories = Object.keys(categorizedPosts).sort();
-
-  sortedCategories.forEach((category) => {
-    const posts = categorizedPosts[category];
-    categoriesHTML += `<div class="archive-year"><h2 style="font-size: 1.5rem; margin: 20px 0 10px 0; color: #3d362e;">${category}</h2>`;
-
-    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    posts.forEach((post) => {
-      const date = new Date(post.date);
-      const day = date.getDate().toString().padStart(2, "0");
-      const month = date.toLocaleDateString("en-US", { month: "short" });
-      const year = date.getFullYear();
-      categoriesHTML += `
-        <div style="margin-bottom: 12px; padding-left: 20px;">
-          <span style="color: #a0907d; font-size: 1.2rem;">${year}&nbsp;&nbsp;&nbsp;${month}&nbsp;&nbsp;&nbsp;${day}</span> &nbsp;&nbsp;-&nbsp;&nbsp;
-          <a href="/${post.url}/" style="color: #4a453f; text-decoration: none;">${post.title}</a>
-        </div>
-      `;
-    });
-
-    categoriesHTML += "</div>";
-  });
-
-  return categoriesHTML;
 }
 
 async function ensureDir(dirPath) {
@@ -451,26 +408,6 @@ async function buildArchivePage(templates, data) {
   console.log("Built archive/index.html");
 }
 
-async function buildCategoriesPage(template, data) {
-  console.log("Building categories page...");
-
-  const categorizedPosts = groupPostsByCategory(data.posts);
-  const categoriesHTML = generateCategoriesPage(categorizedPosts);
-
-  const headHTML = generateHead(template.head, data, "../assets");
-  const headerHTML = generateHeader(template.header, data, "categories");
-  const footerHTML = generateFooter(template.footer, data);
-  const html = template.categories
-    .replace(/\{\{HEAD\}\}/g, headHTML)
-    .replace(/\{\{HEADER\}\}/g, headerHTML)
-    .replace(/\{\{CONTENT\}\}/g, categoriesHTML)
-    .replace(/\{\{FOOTER\}\}/g, footerHTML);
-
-  await ensureDir(`${CONFIG.OUTPUT_DIR}/categories`);
-  await promises.writeFile(`${CONFIG.OUTPUT_DIR}/categories/index.html`, html);
-  console.log("Built categories/index.html");
-}
-
 async function copyDirectory(src, dest) {
   await promises.access(src);
   await ensureDir(dest);
@@ -505,7 +442,6 @@ async function build() {
   await buildPostPages(templates, data);
   await buildAboutPage(templates, data);
   await buildArchivePage(templates, data);
-  await buildCategoriesPage(templates, data);
   await copyDirectory("src/assets", `${CONFIG.OUTPUT_DIR}/assets`);
 
   console.log("Blog build completed successfully!");
