@@ -124,15 +124,6 @@ function createExcerpt(content, maxLength = CONFIG.EXCERPT_MAX_LENGTH) {
   return truncated.substring(0, lastSpace) + "...";
 }
 
-function escapeXml(unsafe) {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
 function groupPostsByYear(posts) {
   const postsByYear = {};
   posts.forEach((post) => {
