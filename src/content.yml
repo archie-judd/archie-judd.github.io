@@ -10,19 +10,9 @@ posts:
     title: Kiefer / Van Gogh at the Royal Academy
     url: posts/kiefer-van-gogh
     subtitle: A very short review
-    tags:
-      - review
-      - art
-      - Van Gogh
-      - Kiefer
-      - Royal Academy
     filepath: src/content/posts/kiefer-van-gogh.md
   - date: 2025-08-03
     title: I saw an octopus, briefly
     url: posts/i-saw-an-octopus
     subtitle:
-    category:
-      - experience
-      - nature
-      - octopus
     filepath: src/content/posts/i-saw-an-octopus.md
