@@ -5,7 +5,7 @@
 }
 
 body {
-  font-family: "EB Garamond", Georgia, serif;
+  font-family: "EB Garamond", serif;
   line-height: 1.7;
   color: #4a453f;
   background-color: #faf9f7;
@@ -284,27 +284,6 @@ img {
   color: #6b5e4f;
 }
 
-.content-body code {
-  background: #f5f2ed;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-family: "Courier New", monospace;
-  font-size: 0.9em;
-}
-
-.content-body pre {
-  background: #f5f2ed;
-  padding: 15px;
-  border-radius: 5px;
-  overflow-x: auto;
-  margin: 20px 0;
-}
-
-.content-body pre code {
-  background: none;
-  padding: 0;
-}
-
 /* ===== IMAGES ===== */
 .post-image {
   text-align: center;
@@ -358,6 +337,55 @@ img {
   color: #a0907d;
   font-size: 0.85rem;
   margin: 0;
+}
+
+/* ===== CODE STYLES ===== */
+code {
+  background-color: #45475a; /* Surface1 fallback */
+  color: #cdd6f4;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-family: "Source Code Pro", monospace;
+  font-size: 0.9em;
+}
+/* Inline code */
+.content-body code {
+  background-color: #313244; /* Catppuccin Surface0 */
+  color: #cdd6f4; /* Catppuccin Text */
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: "Source Code Pro", monospace;
+  font-size: 0.9em;
+  border: 1px solid #45475a; /* Catppuccin Surface1 */
+}
+
+/* Code blocks */
+.content-body pre {
+  background-color: #313244; /* Catppuccin Surface0 */
+  color: #cdd6f4; /* Catppuccin Text */
+  padding: 15px;
+  border-radius: 5px;
+  overflow-x: auto;
+  margin: 20px 0;
+  border: 1px solid #45475a; /* Catppuccin Surface1 */
+  font-family: "Source Code Pro", monospace;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+.content-body pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  color: inherit;
+  font-family: "Source Code Pro", monospace;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+.content-body pre ::selection,
+.content-body pre code ::selection {
+  background: rgba(147, 153, 178, 0.3); /* Catppuccin selection color */
 }
 
 /* ===== RESPONSIVE DESIGN ===== */

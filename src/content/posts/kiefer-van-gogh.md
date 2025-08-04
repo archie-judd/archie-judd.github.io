@@ -12,4 +12,3 @@ The paintings were beautiful - when I could actually see them. This exhibition w
 There's a gallery guide for £2.50. It has some diary entries from Kiefer at 18, when he received a travel bursary to follow Van Gogh's footsteps. He has a self aware and unaffected tone that is really endearing. It's a nice takeaway to read afterwards.
 
 5/5
-

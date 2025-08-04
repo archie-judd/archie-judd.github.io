@@ -11,10 +11,14 @@
     "clean": "rm -rf docs"
   },
   "dependencies": {
+    "highlight.js": "^11.11.1",
+    "hljs": "^6.2.3",
     "js-yaml": "^4.1.0",
-    "marked": "^9.1.6"
+    "marked": "^9.1.6",
+    "marked-highlight": "^2.2.2"
   },
   "devDependencies": {
+    "@catppuccin/highlightjs": "^1.0.1",
     "nodemon": "^3.1.10",
     "serve": "^14.2.1"
   },

@@ -1,12 +1,31 @@
 #!/usr/bin/env node
 
 import { promises } from "fs";
+import hljs from "highlight.js";
 import * as yaml from "js-yaml";
-import { marked } from "marked";
+import { Marked } from "marked";
+import { markedHighlight } from "marked-highlight";
 import * as path from "path";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
+
+// Code syntax highlighting
+const marked = new Marked(
+  markedHighlight({
+    emptyLangClass: "hljs",
+    langPrefix: "hljs language-",
+    highlight(code, lang, info) {
+      const language = hljs.getLanguage(lang) ? lang : "plaintext";
+      return hljs.highlight(code, { language }).value;
+    },
+  }),
+);
+
+const markdown = "```python\nstart = dt.datetime(2024,10,2)\n```";
+
+const html = marked.parse(markdown);
+console.log(html);
 
 const CONFIG = {
   EXCERPT_MAX_LENGTH: 300,
