@@ -39,6 +39,18 @@ function getSlugFromFile(filePath) {
   return filePath.split("/").pop().replace(".md", "");
 }
 
+function sanitizeRSSDescription(text) {
+  return (
+    text
+      // Replace ampersands with 'and' (safest for RSS/CDATA)
+      .replace(/&/g, "and")
+
+      // Normalize whitespace
+      .replace(/\s+/g, " ")
+      .trim()
+  );
+}
+
 async function loadTemplates() {
   const templateFiles = [
     "head.html",
@@ -288,7 +300,10 @@ async function generateRSSFeed(data) {
 
   for (const post of postsForRSS) {
     const content = await loadContent(post.filepath);
-    const description = content ? createExcerpt(content, 500) : post.subtitle;
+    const descriptionRaw = content
+      ? createExcerpt(content, 500)
+      : post.subtitle;
+    const description = sanitizeRSSDescription(descriptionRaw);
     const postUrl = `${data.url}/${post.path}/`;
 
     rssItems += `
