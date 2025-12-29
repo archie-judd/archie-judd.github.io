@@ -16,3 +16,8 @@ posts:
     url: posts/i-saw-an-octopus
     subtitle:
     filepath: src/content/posts/i-saw-an-octopus.md
+  - date: 2025-12-28
+    title: I'm going long on medium duration government bonds baby!
+    url: posts/investment-ramble-2026
+    subtitle:
+    filepath: src/content/posts/investment-ramble-2026.md
