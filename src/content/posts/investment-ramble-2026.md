@@ -38,15 +38,17 @@ However, assuming interest rates keep falling, government bonds may increase in 
 
 Unhedged government bonds return in their base currency (usually USD). So investors take the risk (or reward) resulting from any currency fluctuation between GBP and USD between the time they buy and sell. If the AI boom continues, capital will keep flowing into US equities and corporate bonds, strengthening the dollar, and if the AI bubble pops, the money is likely to flow into the US, because of US bonds' safe-haven quality. I don't know what'll happen to GBP. In a global recession GBP tends to weaken against USD which is good (if you hold unhedged government bonds).
 
-So, there are multiple scenarios where unhedged government bonds pay off:
+With regards to duration, longer-duration bonds are more sensitive to interest rate changes, short-duration bonds much less so. If interest rates fall, medium and long duration bonds are likely to do very well. If inflation remains sticky and interest rates don't fall (or rise), they are likely to do very poorly. Inflation in the US is forecast to remain sticky in the first half of 2026, and likely to fall towards the 2% target in the latter half of 2026, and into 2027. If the AI bubble pops, the effect will be disinflationary, or even deflationary.
 
-1. Interest rates fall (likely)
+So, there are multiple scenarios where medium duration unhedged government bonds pay off, and the more of these happen, the better they pay off:
+
+1. Inflation falls (likely)
 2. USD strengthens against GBP (possible)
 3. Recession, or AI bubble pops (possible)
 
 And some scenarios where they don't:
 
-1. Interest rates raise (unlikely)
-2. GBP strengthens against USD (seems unlikely, but I have no idea)
+1. Inflations remains high (possible)
+2. GBP strengthens against USD (uncertain)
 
-I think that makes them a compelling equity-bubble mitigation alternative (or complement) to short-term GBP hedged bonds.
+I think that makes medium duration unhedged government bonds a compelling equity-bubble mitigation alternative (or complement) to short-term GBP hedged bonds.
