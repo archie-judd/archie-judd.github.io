@@ -35,6 +35,10 @@ const CONFIG = {
   RSS_MAX_POSTS: 20,
 };
 
+function getSlugFromFile(filePath) {
+  return filePath.split("/").pop().replace(".md", "");
+}
+
 async function loadTemplates() {
   const templateFiles = [
     "head.html",
@@ -69,13 +73,17 @@ async function loadBlogData() {
     const yamlData = yaml.load(yamlContent);
 
     // Process posts
-    const posts = yamlData.posts.map((post) => ({
-      title: post.title,
-      subtitle: post.subtitle || "",
-      date: new Date(post.date),
-      filepath: post.filepath,
-      url: post.url,
-    }));
+    const posts = yamlData.posts.map((postRaw) => {
+      const slug = postRaw.slug || getSlugFromFile(postRaw.filepath);
+
+      return {
+        title: postRaw.title,
+        subtitle: postRaw.subtitle || "",
+        date: new Date(postRaw.date),
+        filepath: postRaw.filepath,
+        path: `posts/${slug}`,
+      };
+    });
 
     // Sort posts by date (newest first)
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -188,20 +196,20 @@ function generateFeaturedPost(post, postContent, isFirst = false) {
       <div class="post-excerpt">
         <p>${postExcerpt}</p>
       </div>
-      <a href="/${post.url}/" class="read-more">Continue reading</a>
+      <a href="/${post.path}/" class="read-more">Continue reading</a>
     </article>
   `;
 }
 
 function generatePostNavigation(post, posts) {
-  const currentIndex = posts.findIndex((p) => p.url === post.url);
+  const currentIndex = posts.findIndex((p) => p.path === post.path);
   let navHTML = '<div class="post-nav-container">';
 
   if (currentIndex > 0) {
     const prevPost = posts[currentIndex - 1];
     navHTML += `
       <div class="post-nav-left">
-        <a href="/${prevPost.url}/" class="nav-button">Previous</a>
+        <a href="/${prevPost.path}/" class="nav-button">Previous</a>
       </div>
     `;
   }
@@ -210,7 +218,7 @@ function generatePostNavigation(post, posts) {
     const nextPost = posts[currentIndex + 1];
     navHTML += `
       <div class="post-nav-right">
-        <a href="/${nextPost.url}/" class="nav-button">Next</a>
+        <a href="/${nextPost.path}/" class="nav-button">Next</a>
       </div>
     `;
   }
@@ -249,14 +257,14 @@ function generateArchivePage(postsByYear) {
             <h3 class="archive-month-header">${month}</h3>
             <div>
               <span class="archive-date">${day}</span> &nbsp;&nbsp;-&nbsp;&nbsp;
-              <a href="/${post.url}/" class="archive-link">${post.title}</a>
+              <a href="/${post.path}/" class="archive-link">${post.title}</a>
             </div>
           `;
         } else {
           archiveHTML += `
             <div class="archive-month-spacer"></div>
             <span class="archive-date">${day}</span> &nbsp;&nbsp;-&nbsp;&nbsp;
-            <a href="/${post.url}/" class="archive-link">${post.title}</a>
+            <a href="/${post.path}/" class="archive-link">${post.title}</a>
           `;
         }
 
@@ -281,7 +289,7 @@ async function generateRSSFeed(data) {
   for (const post of postsForRSS) {
     const content = await loadContent(post.filepath);
     const description = content ? createExcerpt(content, 500) : post.subtitle;
-    const postUrl = `${data.url}/${post.url}/`;
+    const postUrl = `${data.url}/${post.path}/`;
 
     rssItems += `
     <item>
@@ -402,12 +410,13 @@ async function buildPostPages(templates, data) {
     const content = await loadContent(post.filepath);
 
     if (!content) {
-      console.warn(`Could not load content for ${post.url}`);
+      console.warn(`Could not load content for ${post.path}`);
       continue;
     }
     const postContentHTML = marked.parse(content);
     const postNavigationHTML = generatePostNavigation(post, data.posts);
     const postDate = formatDate(post.date);
+    const postDir = `${CONFIG.OUTPUT_DIR}/${post.path}`;
 
     const html = templates.post
       .replace(/\{\{HEAD\}\}/g, headHTML)
@@ -419,12 +428,9 @@ async function buildPostPages(templates, data) {
       .replace(/\{\{POST_NAVIGATION\}\}/g, postNavigationHTML)
       .replace(/\{\{FOOTER\}\}/g, footerHTML);
 
-    await ensureDir(`${CONFIG.OUTPUT_DIR}/${post.url}`);
-    await promises.writeFile(
-      `${CONFIG.OUTPUT_DIR}/${post.url}/index.html`,
-      html,
-    );
-    console.log(`Built ${post.url}/index.html`);
+    await ensureDir(postDir);
+    await promises.writeFile(`${postDir}/index.html`, html);
+    console.log(`Built ${post.pathslug}/index.html`);
   }
 }
 

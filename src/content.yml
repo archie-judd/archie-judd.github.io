@@ -8,16 +8,16 @@ about:
 posts:
   - date: 2025-07-28
     title: Kiefer / Van Gogh at the Royal Academy
-    url: posts/kiefer-van-gogh
+    slug:
     subtitle: A very short review
     filepath: src/content/posts/kiefer-van-gogh.md
   - date: 2025-08-03
     title: I saw an octopus, briefly
-    url: posts/i-saw-an-octopus
+    slug:
     subtitle:
     filepath: src/content/posts/i-saw-an-octopus.md
   - date: 2025-12-28
-    title: I'm going long on medium duration government bonds baby!
-    url: posts/investment-ramble-2026
+    title: I'm going long on medium duration unhedged government bonds baby!
+    slug:
     subtitle:
-    filepath: src/content/posts/investment-ramble-2026.md
+    filepath: src/content/posts/medium-duration-unhedged-bonds.md
