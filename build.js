@@ -515,6 +515,7 @@ async function build() {
   await buildRSSFeed(data);
   await copyDirectory("src/assets", `${CONFIG.OUTPUT_DIR}/assets`);
   await promises.copyFile("src/CNAME", `${CONFIG.OUTPUT_DIR}/CNAME`);
+  await promises.copyFile("src/robots.txt", `${CONFIG.OUTPUT_DIR}/robots.txt`);
 
   console.log("Blog build completed successfully!");
   console.log(
