@@ -1,4 +1,4 @@
-What follows is the inaugral annual investment ramble as part of my five year (likely longer [possibly shorter!]) plan to buy a house. This isn't advice, I don't know what I'm talking about, I am just organising my inexpert thoughts and I won't make a habit of it.
+What follows is the inaugural annual investment ramble as part of my five year (likely longer [possibly shorter!]) plan to buy a house. This isn't advice, I don't know what I'm talking about, I am just organising my inexpert thoughts and I won't make a habit of it.
 
 ### US Equities are expensive
 
@@ -28,7 +28,7 @@ This price rise has largely been driven by central banks buying and geopolitical
 
 ### Government Bonds seem sensible
 
-With inflation falling over 2025, central banks lowered interest rates. In the UK, interest rates fell from 4.75% to 3.75%. The same pattern is predicted in 2025 meaning money market fund returns are likely to drop further.
+With inflation falling over 2025, central banks lowered interest rates. In the UK, interest rates fell from 4.75% to 3.75%. The same pattern is predicted in 2026 meaning money market fund returns are likely to drop further.
 
 Many tech companies have taken on substantial debt to fund AI infrastructure. If AI revenue growth doesn't meet (high) expectations, servicing that debt may become difficult, which will affect corporate bond markets negatively.
 
