@@ -22,17 +22,13 @@ const marked = new Marked(
   }),
 );
 
-const markdown = "```python\nstart = dt.datetime(2024,10,2)\n```";
-
-const html = marked.parse(markdown);
-console.log(html);
-
 const CONFIG = {
   EXCERPT_MAX_LENGTH: 300,
   HOME_POSTS_COUNT: 5,
   EXCERPT_SENTENCE_THRESHOLD: 0.6,
   OUTPUT_DIR: "docs",
   RSS_MAX_POSTS: 20,
+  RSS_ICON_URL: "assets/icons/rss-144x144.png",
 };
 
 function getSlugFromFile(filePath) {
@@ -328,7 +324,7 @@ async function generateRSSFeed(data) {
       <description><![CDATA[${data.description}]]></description>
       <link>${data.url}</link>
       <image>
-        <url>${data.url}/favicon.ico</url>
+        <url>${data.url}/${CONFIG.RSS_ICON_URL}</url>
         <title><![CDATA[${data.title}]]></title>
         <link>${data.url}</link>
       </image>
