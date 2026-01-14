@@ -4,11 +4,16 @@
     <title><![CDATA[Archie Judd]]></title>
     <description><![CDATA[Archie Judd - Archie Judd's personal website]]></description>
     <link>https://archiejudd.com</link>
+    <image>
+      <url>https://archiejudd.com/assets/icons/android-chrome-192x192.png</url>
+      <title><![CDATA[Archie Judd]]></title>
+      <link>https://archiejudd.com</link>
+    </image>
     <atom:link href="https://archiejudd.com/feed.xml" rel="self" type="application/rss+xml"/>
     <language>en-us</language>
     <managingEditor>noreply@archiejudd.com (Archie Judd)</managingEditor>
     <webMaster>noreply@archiejudd.com (Archie Judd)</webMaster>
-    <lastBuildDate>Tue, 30 Dec 2025 00:44:46 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 14 Jan 2026 14:26:29 GMT</lastBuildDate>
     <pubDate>Sun, 28 Dec 2025 00:00:00 GMT</pubDate>
     <ttl>60</ttl>
     <item>
