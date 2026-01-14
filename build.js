@@ -542,6 +542,10 @@ async function build() {
   await buildArchivePage(templates, data);
   await buildRSSFeed(data);
   await copyDirectory("src/assets", `${CONFIG.OUTPUT_DIR}/assets`);
+  await promises.copyFile(
+    "src/assets/icons/favicon.ico",
+    `${CONFIG.OUTPUT_DIR}/favicon.ico`,
+  );
   await promises.copyFile("src/CNAME", `${CONFIG.OUTPUT_DIR}/CNAME`);
   await promises.copyFile("src/robots.txt", `${CONFIG.OUTPUT_DIR}/robots.txt`);
 
