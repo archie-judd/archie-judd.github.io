@@ -328,7 +328,7 @@ async function generateRSSFeed(data) {
     <description><![CDATA[${data.description}]]></description>
     <link>${data.url}</link>
     <image>
-      <url>${data.url}/assets/icons/android-chrome-192x192.png</url>
+      <url>${data.url}/assets/icons/rss-144x144.png</url>
       <title><![CDATA[${data.title}]]></title>
       <link>${data.url}</link>
     </image>
