@@ -399,7 +399,7 @@ async function buildHomePage(templates, data) {
       }
     }
   }
-  const headHTML = generateHead(templates.head, data, "../assets");
+  const headHTML = generateHead(templates.head, data, "/assets");
   const headerHTML = generateHeader(templates.header, data, "home");
   const footerHTML = generateFooter(templates.footer, data);
 
@@ -417,7 +417,7 @@ async function buildHomePage(templates, data) {
 async function buildPostPages(templates, data) {
   console.log("Building post pages...");
 
-  const headHTML = generateHead(templates.head, data, "../../assets");
+  const headHTML = generateHead(templates.head, data, "/assets");
   const headerHTML = generateHeader(templates.header, data, null);
   const footerHTML = generateFooter(templates.footer, data);
 
@@ -456,7 +456,7 @@ async function buildAboutPage(templates, data) {
   const aboutContent = content
     ? marked.parse(content)
     : "<p>About content could not be loaded.</p>";
-  const headHTML = generateHead(templates.head, data, "../assets");
+  const headHTML = generateHead(templates.head, data, "/assets");
   const headerHTML = generateHeader(templates.header, data, "about");
   const footerHTML = generateFooter(templates.footer, data);
 
@@ -476,7 +476,7 @@ async function buildArchivePage(templates, data) {
 
   const postsByYear = groupPostsByYear(data.posts);
   const archiveHTML = generateArchivePage(postsByYear);
-  const headHTML = generateHead(templates.head, data, "../assets");
+  const headHTML = generateHead(templates.head, data, "/assets");
   const headerHTML = generateHeader(templates.header, data, "archive");
   const footerHTML = generateFooter(templates.footer, data);
 
