@@ -28,7 +28,6 @@ const CONFIG = {
   EXCERPT_SENTENCE_THRESHOLD: 0.6,
   OUTPUT_DIR: "dist",
   RSS_MAX_POSTS: 20,
-  RSS_ICON_URL: "assets/icons/rss-144x144.png",
 };
 
 function getSlugFromFile(filePath) {
@@ -324,7 +323,7 @@ async function generateRSSFeed(data) {
       <description><![CDATA[${data.description}]]></description>
       <link>${data.url}</link>
       <image>
-        <url>${data.url}/${CONFIG.RSS_ICON_URL}</url>
+        <url>${data.url}/assets/icons/rss-144x144.png</url>
         <title><![CDATA[${data.title}]]></title>
         <link>${data.url}</link>
       </image>
@@ -538,7 +537,10 @@ async function build() {
   await copyDirectory("src/assets", `${CONFIG.OUTPUT_DIR}/assets`);
   await promises.copyFile("src/CNAME", `${CONFIG.OUTPUT_DIR}/CNAME`);
   await promises.copyFile("src/robots.txt", `${CONFIG.OUTPUT_DIR}/robots.txt`);
-  await promises.copyFile("src/.nojekyll", `${CONFIG.OUTPUT_DIR}/.nojekyll`);
+  await promises.copyFile(
+    "src/assets/icons/favicon.ico",
+    `${CONFIG.OUTPUT_DIR}/favicon.ico`,
+  );
 
   console.log("Blog build completed successfully!");
   console.log(
