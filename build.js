@@ -327,6 +327,11 @@ async function generateRSSFeed(data) {
     <title><![CDATA[${data.title}]]></title>
     <description><![CDATA[${data.description}]]></description>
     <link>${data.url}</link>
+    <image>
+      <url>${data.url}/assets/icons/android-chrome-192x192.png</url>
+      <title><![CDATA[${data.title}]]></title>
+      <link>${data.url}</link>
+    </image>
     <atom:link href="${data.url}/feed.xml" rel="self" type="application/rss+xml"/>
     <language>en-us</language>
     <managingEditor>${email} (${data.author})</managingEditor>
