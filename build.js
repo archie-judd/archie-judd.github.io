@@ -319,14 +319,12 @@ async function generateRSSFeed(data) {
   const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
   <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-      <title><![CDATA[${data.title}]]></title>
+      <title>${data.title}</title>
       <description><![CDATA[${data.description}]]></description>
       <link>${data.url}</link>
-      <atom:logo>${data.url}/assets/icons/rss-144x144.png</atom:logo>
-      <atom:icon>${data.url}/assets/icons/rss-144x144.png</atom:icon>
       <image>
         <url>${data.url}/assets/icons/rss-144x144.png</url>
-        <title>Archie Judd</title>
+        <title>${data.title}</title>
         <link>${data.url}</link>
       </image>
       <atom:link href="${data.url}/feed.xml" rel="self" type="application/rss+xml"/>
