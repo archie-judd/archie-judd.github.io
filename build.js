@@ -324,7 +324,7 @@ async function generateRSSFeed(data) {
       <link>${data.url}</link>
       <image>
         <url>${data.url}/assets/icons/rss-144x144.png</url>
-        <title><![CDATA[${data.title}]]></title>
+        <title>Archie Judd</title>
         <link>${data.url}</link>
       </image>
       <atom:link href="${data.url}/feed.xml" rel="self" type="application/rss+xml"/>
