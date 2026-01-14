@@ -26,7 +26,7 @@ const CONFIG = {
   EXCERPT_MAX_LENGTH: 300,
   HOME_POSTS_COUNT: 5,
   EXCERPT_SENTENCE_THRESHOLD: 0.6,
-  OUTPUT_DIR: "docs",
+  OUTPUT_DIR: "dist",
   RSS_MAX_POSTS: 20,
   RSS_ICON_URL: "assets/icons/rss-144x144.png",
 };
