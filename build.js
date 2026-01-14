@@ -322,6 +322,8 @@ async function generateRSSFeed(data) {
       <title><![CDATA[${data.title}]]></title>
       <description><![CDATA[${data.description}]]></description>
       <link>${data.url}</link>
+      <atom:logo>${data.url}/assets/icons/rss-144x144.png</atom:logo>
+      <atom:icon>${data.url}/assets/icons/rss-144x144.png</atom:icon>
       <image>
         <url>${data.url}/assets/icons/rss-144x144.png</url>
         <title>Archie Judd</title>
