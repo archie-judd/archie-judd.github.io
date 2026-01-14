@@ -5,17 +5,15 @@
       <description><![CDATA[Archie Judd - Archie Judd's personal website]]></description>
       <link>https://archiejudd.com</link>
       <image>
-        <url>https://archiejudd.com/assets/icons/favicon-32x32.png</url>
+        <url>https://archiejudd.com/favicon.ico</url>
         <title><![CDATA[Archie Judd]]></title>
         <link>https://archiejudd.com</link>
-        <width>144</width>
-        <height>144</height>
       </image>
       <atom:link href="https://archiejudd.com/feed.xml" rel="self" type="application/rss+xml"/>
       <language>en-us</language>
       <managingEditor>noreply@archiejudd.com (Archie Judd)</managingEditor>
       <webMaster>noreply@archiejudd.com (Archie Judd)</webMaster>
-      <lastBuildDate>Wed, 14 Jan 2026 21:42:14 GMT</lastBuildDate>
+      <lastBuildDate>Wed, 14 Jan 2026 21:44:58 GMT</lastBuildDate>
       <pubDate>Sun, 28 Dec 2025 00:00:00 GMT</pubDate>
       <ttl>60</ttl>
     <item>
