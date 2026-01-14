@@ -321,27 +321,505 @@ async function generateRSSFeed(data) {
     data.posts.length > 0 ? formatRSSDate(data.posts[0].date) : lastBuildDate;
   const email = `noreply@${data.url.replace(/https?:\/\//, "").replace(/\/$/, "")}`;
 
-  const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title><![CDATA[${data.title}]]></title>
-    <description><![CDATA[${data.description}]]></description>
-    <link>${data.url}</link>
-    <image>
-      <url>${data.url}/assets/icons/rss-144x144.png</url>
-      <title><![CDATA[${data.title}]]></title>
-      <link>${data.url}</link>
-      <width>144</width>
-      <height>144</height>
-    </image>
-    <atom:link href="${data.url}/feed.xml" rel="self" type="application/rss+xml"/>
-    <language>en-us</language>
-    <managingEditor>${email} (${data.author})</managingEditor>
-    <webMaster>${email} (${data.author})</webMaster>
-    <lastBuildDate>${lastBuildDate}</lastBuildDate>
-    <pubDate>${mostRecentPostDate}</pubDate>
-    <ttl>60</ttl>${rssItems}
-  </channel>
+  //   const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
+  // <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  //   <channel>
+  //     <title><![CDATA[${data.title}]]></title>
+  //     <description><![CDATA[${data.description}]]></description>
+  //     <link>${data.url}</link>
+  //     <image>
+  //       <url>${data.url}/assets/icons/rss-144x144.png</url>
+  //       <title><![CDATA[${data.title}]]></title>
+  //       <link>${data.url}</link>
+  //       <width>144</width>
+  //       <height>144</height>
+  //     </image>
+  //     <atom:link href="${data.url}/feed.xml" rel="self" type="application/rss+xml"/>
+  //     <language>en-us</language>
+  //     <managingEditor>${email} (${data.author})</managingEditor>
+  //     <webMaster>${email} (${data.author})</webMaster>
+  //     <lastBuildDate>${lastBuildDate}</lastBuildDate>
+  //     <pubDate>${mostRecentPostDate}</pubDate>
+  //     <ttl>60</ttl>${rssItems}
+  //   </channel>
+  // </rss>`;
+
+  const rssXml = `<rss version="2.0">
+<channel>
+<title>BBC News</title>
+<description>BBC News - Africa</description>
+<link>https://www.bbc.co.uk/news/world/africa</link>
+<image>
+<url>
+https://news.bbcimg.co.uk/nol/shared/img/bbc_news_120x60.gif
+</url>
+<title>BBC News</title>
+<link>https://www.bbc.co.uk/news/world/africa</link>
+</image>
+<generator>RSS for Node</generator>
+<lastBuildDate>Wed, 14 Jan 2026 20:48:13 GMT</lastBuildDate>
+<atom:link href="https://feeds.bbci.co.uk/news/world/africa/rss.xml" rel="self" type="application/rss+xml"/>
+<copyright>
+Copyright: (C) British Broadcasting Corporation, see https://www.bbc.co.uk/usingthebbc/terms-of-use/#15metadataandrssfeeds for terms and conditions of reuse.
+</copyright>
+<language>en-gb</language>
+<ttl>15</ttl>
+<item>
+<title>
+Uganda election chief says he has had threats over results declaration
+</title>
+<description>
+This follows comments by a presidential assistant that Bobi Wine would not be declared president, even if he wins.
+</description>
+<link>
+https://www.bbc.com/news/articles/c62vd7542rno?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/c62vd7542rno#0</guid>
+<pubDate>Wed, 14 Jan 2026 18:18:46 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/a5ef/live/4b96a450-f140-11f0-bd56-9b1dc8f84e89.jpg"/>
+</item>
+<item>
+<title>
+'Welcome to 2976' - North Africa's Amazigh people ring in the new year
+</title>
+<description>
+The Amazigh calendar places them almost a thousand years ahead of much of the rest of the world.
+</description>
+<link>
+https://www.bbc.com/news/articles/cj0nm44g361o?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/cj0nm44g361o#0</guid>
+<pubDate>Wed, 14 Jan 2026 00:37:02 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/32fe/live/3c269770-f099-11f0-b385-5f48925de19a.jpg"/>
+</item>
+<item>
+<title>
+Trump administration moves to end deportation protection for Somalis
+</title>
+<description>
+As the US cracks down on illegal immigration in Minneapolis, home to a large Somali community, it will end protections for many in the country legally.
+</description>
+<link>
+https://www.bbc.com/news/articles/cz0p9ld5egjo?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/cz0p9ld5egjo#0</guid>
+<pubDate>Tue, 13 Jan 2026 16:43:36 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/8769/live/d7362a90-f095-11f0-95e0-85a8cfcc8ed7.jpg"/>
+</item>
+<item>
+<title>Why Osimhen has become 'king of Nigerian football'</title>
+<description>
+Nigeria face a huge semi-final against Africa Cup of Nations hosts and favourites Morocco on Wednesday.
+</description>
+<link>
+https://www.bbc.com/sport/football/articles/ce9yxjr98pgo?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">
+https://www.bbc.com/sport/football/articles/ce9yxjr98pgo#0
+</guid>
+<pubDate>Wed, 14 Jan 2026 08:52:51 GMT</pubDate>
+<media:thumbnail width="240" height="134" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/d644/live/d7b29840-f06e-11f0-a8a9-7f10ab32742b.jpg"/>
+</item>
+<item>
+<title>
+Operation against Nigerian kidnapping gang kills '200 bandits' - official tells BBC
+</title>
+<description>
+The offensive is in the central state of Kogi, where the bandits have recently become more active.
+</description>
+<link>
+https://www.bbc.com/news/articles/cevn0ezr0rgo?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/cevn0ezr0rgo#0</guid>
+<pubDate>Tue, 13 Jan 2026 16:09:38 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/943a/live/77cad750-f099-11f0-b385-5f48925de19a.jpg"/>
+</item>
+<item>
+<title>
+Niger revokes licences of tanker drivers who refuse to go to Mali amid jihadist blockade
+</title>
+<description>
+Jihadists have been targeting tankers entering Mali, worsening the country’s fuel shortage.
+</description>
+<link>
+https://www.bbc.com/news/articles/cr578g7v082o?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/cr578g7v082o#0</guid>
+<pubDate>Tue, 13 Jan 2026 10:24:30 GMT</pubDate>
+<media:thumbnail width="240" height="134" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/e812/live/ece14990-f051-11f0-a7dd-01f56af872ef.jpg"/>
+</item>
+<item>
+<title>
+Will voters in one of the world's youngest countries give an 81-year-old another term?
+</title>
+<description>
+Thursday's election highlights a demographic issue common to many African countries.
+</description>
+<link>
+https://www.bbc.com/news/articles/c77k8pym06zo?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/c77k8pym06zo#1</guid>
+<pubDate>Tue, 13 Jan 2026 00:22:34 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/2d4f/live/0f4e66c0-ef94-11f0-b5f7-49f0357294ff.jpg"/>
+</item>
+<item>
+<title>
+He once criticised African leaders who cling to power. Now he wants a seventh term
+</title>
+<description>
+Yoweri Museveni, 81, says he has brought stability to Uganda. His critics complain of political oppression.
+</description>
+<link>
+https://www.bbc.com/news/articles/cr7jep39eg4o?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/cr7jep39eg4o#1</guid>
+<pubDate>Mon, 12 Jan 2026 10:43:00 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/b4c1/live/d7993380-ebf2-11f0-8608-ef259671aea9.jpg"/>
+</item>
+<item>
+<title>
+'Hounded and harassed': The former pop star taking on Uganda's long-time president
+</title>
+<description>
+Bobi Wine - a former musician - has been arrested numerous times as he challenges President Yoweri Museveni.
+</description>
+<link>
+https://www.bbc.com/news/articles/cz0pr807yz7o?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/cz0pr807yz7o#1</guid>
+<pubDate>Mon, 12 Jan 2026 10:48:32 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/5ae1/live/8dcd1020-ea38-11f0-b5f7-49f0357294ff.jpg"/>
+</item>
+<item>
+<title>
+The musician and the strongman leader - what you need to know about Uganda's election
+</title>
+<description>
+Voters could propel a leader into a fifth decade in power or back a change candidate.
+</description>
+<link>
+https://www.bbc.com/news/articles/c205dd7gjrpo?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/c205dd7gjrpo#1</guid>
+<pubDate>Fri, 09 Jan 2026 14:25:35 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/711d/live/839800c0-ed57-11f0-a422-4ba8a094a8fa.jpg"/>
+</item>
+<item>
+<title>
+South Africa's strained ties with US face new test - war games with China, Iran and Russia
+</title>
+<description>
+The naval exercises could inflame relations with Donald Trump - who is already at loggerheads with Pretoria.
+</description>
+<link>
+https://www.bbc.com/news/articles/c62wxezynk2o?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/c62wxezynk2o#2</guid>
+<pubDate>Sat, 10 Jan 2026 00:05:41 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/651a/live/9b0c36d0-ed9e-11f0-b385-5f48925de19a.jpg"/>
+</item>
+<item>
+<title>
+The secret mission to fly ex-Somali president's body back home from Nigeria
+</title>
+<description>
+An ex-air force pilot explains how he carried out an undercover mission to fly Siad Barre's body home for burial.
+</description>
+<link>
+https://www.bbc.com/news/articles/c5y2v2p3nl8o?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/c5y2v2p3nl8o#2</guid>
+<pubDate>Fri, 09 Jan 2026 00:17:11 GMT</pubDate>
+<media:thumbnail width="240" height="134" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/45b0/live/e692e6a0-ec93-11f0-bed4-4bc64ed151a7.jpg"/>
+</item>
+<item>
+<title>
+Afcon quiz: Name every Africa Cup of Nations winner
+</title>
+<description>
+With the Africa Cup of Nations kicking off on Sunday, 21 December, can you name every tournament winner?
+</description>
+<link>
+https://www.bbc.com/sport/football/articles/c5yql3n8v5qo?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">
+https://www.bbc.com/sport/football/articles/c5yql3n8v5qo#2
+</guid>
+<pubDate>Wed, 14 Jan 2026 09:15:40 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/c2af/live/dba94040-db59-11f0-b67b-690eb873de1b.jpg"/>
+</item>
+<item>
+<title>
+Long wait for justice leaves South African families in limbo
+</title>
+<description>
+With tens of thousands of cases waiting to be heard, some people have to wait four years for their trials to start.
+</description>
+<link>
+https://www.bbc.com/news/articles/cx2drqwg32do?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/cx2drqwg32do#3</guid>
+<pubDate>Tue, 06 Jan 2026 00:02:46 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/8292/live/e2373430-ea4f-11f0-b385-5f48925de19a.jpg"/>
+</item>
+<item>
+<title>
+'You're invisible, you don't exist' - life without a birth certificate
+</title>
+<description>
+Millions around the world are living in the shadows as stateless people as they lack official papers.
+</description>
+<link>
+https://www.bbc.com/news/articles/cx2drqwp2eyo?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/cx2drqwp2eyo#3</guid>
+<pubDate>Fri, 02 Jan 2026 02:15:28 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/b8d4/live/cb927110-df5d-11f0-a8dc-93c15fe68710.jpg"/>
+</item>
+<item>
+<title>
+Why Israel's recognition of Somaliland as an independent state is controversial
+</title>
+<description>
+Somaliland wants international recognition - here's why, and what could have driven Israel to recognise it now.
+</description>
+<link>
+https://www.bbc.com/news/articles/c14v4kmg275o?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/c14v4kmg275o#3</guid>
+<pubDate>Tue, 30 Dec 2025 09:13:26 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/273f/live/6d4e4d90-e4e4-11f0-94b0-3564906c508d.jpg"/>
+</item>
+<item>
+<title>
+Coups, elections and protests - a difficult year for democracy in Africa
+</title>
+<description>
+Post-election violence in Tanzania and more coups were part of a turbulent 12 months on the continent.
+</description>
+<link>
+https://www.bbc.com/news/articles/c1lr70jg2zgo?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/c1lr70jg2zgo#3</guid>
+<pubDate>Tue, 30 Dec 2025 00:39:04 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/edd7/live/05a0aed0-dcc5-11f0-b67b-690eb873de1b.jpg"/>
+</item>
+<item>
+<title>
+Great white sharks being sold in North African fish markets, say researchers
+</title>
+<description>
+Overfishing and illegal fishing are contributing to the loss of sharks, including great whites.
+</description>
+<link>
+https://www.bbc.com/news/articles/c9qe9wvq534o?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/c9qe9wvq534o#3</guid>
+<pubDate>Tue, 30 Dec 2025 01:15:19 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/8e3a/live/2d959090-df36-11f0-b67b-690eb873de1b.jpg"/>
+</item>
+<item>
+<title>
+An orphan's brutal murder shines a spotlight on child abuse in Somalia
+</title>
+<description>
+The woman who was supposed to care for Saabirin Saylaan was found to have beaten and tortured her.
+</description>
+<link>
+https://www.bbc.com/news/articles/c0je281pnwyo?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/c0je281pnwyo#3</guid>
+<pubDate>Mon, 29 Dec 2025 03:22:26 GMT</pubDate>
+<media:thumbnail width="240" height="143" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/5d55/live/df7ecca0-dcf6-11f0-aae2-2191c0e48a3b.png"/>
+</item>
+<item>
+<title>Salah-Mane rivalry renewed in Afcon semi-finals</title>
+<description>
+Mohamed Salah's Egypt will face Senegal in the Afcon 2025 semi-finals, offering the chance of revenge against his old Liverpool team-mate Sadio Mane.
+</description>
+<link>
+https://www.bbc.com/sport/football/articles/c9dvg5lyz02o?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">
+https://www.bbc.com/sport/football/articles/c9dvg5lyz02o#4
+</guid>
+<pubDate>Tue, 13 Jan 2026 19:41:21 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/0536/live/ce2f7960-f090-11f0-b385-5f48925de19a.png"/>
+</item>
+<item>
+<title>Adesanya set for return - but could it be the end?</title>
+<description>
+Former two-time middleweight champion Israel Adesanya returns to action for the first time in over a year when he faces Joe Pyfer in Seattle, Washington on 28 March.
+</description>
+<link>
+https://www.bbc.com/sport/mixed-martial-arts/articles/c1kl8l33d77o?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">
+https://www.bbc.com/sport/mixed-martial-arts/articles/c1kl8l33d77o#4
+</guid>
+<pubDate>Wed, 14 Jan 2026 07:35:02 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/d3bc/live/1c559d00-f117-11f0-9423-a3ae5cf8d8a8.jpg"/>
+</item>
+<item>
+<title>
+Gabon's government lifts sanctions on team and Aubameyang
+</title>
+<description>
+Gabon's government lifts the sanctions it imposed on the national team and striker Pierre-Emerick Aubameyang after their exit from Afcon 2025.
+</description>
+<link>
+https://www.bbc.com/sport/football/articles/c07xdzdlg4mo?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">
+https://www.bbc.com/sport/football/articles/c07xdzdlg4mo#4
+</guid>
+<pubDate>Tue, 13 Jan 2026 17:07:50 GMT</pubDate>
+<media:thumbnail width="240" height="134" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/b1a9/live/166b7f70-f0a1-11f0-85ea-637af9691683.jpg"/>
+</item>
+<item>
+<title>
+Eritrea included in Afcon 2027 preliminary qualifying
+</title>
+<description>
+Eritrea are included in the preliminary qualifying round draw for the 2027 Africa Cup of Nations despite being unranked by world governing body Fifa.
+</description>
+<link>
+https://www.bbc.com/sport/football/articles/c4g0dx44nego?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">
+https://www.bbc.com/sport/football/articles/c4g0dx44nego#4
+</guid>
+<pubDate>Tue, 13 Jan 2026 14:27:19 GMT</pubDate>
+<media:thumbnail width="240" height="134" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/3d19/live/4e5c7d50-f08b-11f0-92ac-9f1b3a47bd73.jpg"/>
+</item>
+<item>
+<title>
+Hearts insist Mato deal agreed despite Kansas sale claim
+</title>
+<description>
+Sporting Kansas City concede defeat to Heart of Midlothian in their pursuit of Rogers Mato despite the Uganda forward's current club, Vardar, claiming they had accepted an £870,000 offer from the Major League Soccer club for the 22-year-old.
+</description>
+<link>
+https://www.bbc.com/sport/football/articles/c17zwq0xj8xo?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">
+https://www.bbc.com/sport/football/articles/c17zwq0xj8xo#4
+</guid>
+<pubDate>Wed, 14 Jan 2026 15:48:57 GMT</pubDate>
+<media:thumbnail width="240" height="134" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/2ffd/live/84322a90-f09c-11f0-b5f7-49f0357294ff.jpg"/>
+</item>
+<item>
+<title>All you need to know about Afcon 2025</title>
+<description>
+BBC Sport Africa provides all the information on the 2025 Africa Cup of Nations as the 35th edition of the continent's biggest sporting event reaches the semi-finals.
+</description>
+<link>
+https://www.bbc.com/sport/football/articles/ce8gw6erjzlo?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">
+https://www.bbc.com/sport/football/articles/ce8gw6erjzlo#4
+</guid>
+<pubDate>Sat, 10 Jan 2026 22:21:33 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/841d/live/144d4950-d9b6-11f0-b67b-690eb873de1b.jpg"/>
+</item>
+<item>
+<title>
+Algeria apologises after player mocks Congolese superfan dressed as pan-African hero
+</title>
+<description>
+Michel Nkuka Mboladinga stood motionless throughout DR Congo's Afcon matches in tribute to Patrice Lumumba.
+</description>
+<link>
+https://www.bbc.com/news/articles/cj0nqqgy77ro?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/articles/cj0nqqgy77ro#4</guid>
+<pubDate>Thu, 08 Jan 2026 17:57:49 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/28d8/live/94bc1a00-ecb0-11f0-b5f7-49f0357294ff.jpg"/>
+</item>
+<item>
+<title>
+How radioactive rhino horns are helping with conservation
+</title>
+<description>
+A project in South Africa is putting radioactive material in rhino horns to make it harder to smuggle them over borders.
+</description>
+<link>
+https://www.bbc.com/news/videos/cgqe0yxg0zeo?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/videos/cgqe0yxg0zeo#5</guid>
+<pubDate>Fri, 09 Jan 2026 14:23:54 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/44fc/live/423cdc80-eb19-11f0-b5f7-49f0357294ff.jpg"/>
+</item>
+<item>
+<title>
+Sailors saved from going over edge of huge dam in South Africa
+</title>
+<description>
+According to reports, the boat had suffered motor failure before drifting to the edge of the dam.
+</description>
+<link>
+https://www.bbc.com/news/videos/cj6wew4958eo?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/videos/cj6wew4958eo#5</guid>
+<pubDate>Fri, 02 Jan 2026 09:20:10 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/bda5/live/b1c7c660-e7b2-11f0-b67b-690eb873de1b.jpg"/>
+</item>
+<item>
+<title>
+Watch: Stunning celestial events that lit up the skies in 2025
+</title>
+<description>
+From meteor showers to supermoons, here are some of the sights that wowed stargazers this year.
+</description>
+<link>
+https://www.bbc.com/news/videos/c8xdw7j2v2go?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/videos/c8xdw7j2v2go#5</guid>
+<pubDate>Wed, 31 Dec 2025 15:33:33 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/9707/live/7ed3beb0-dd00-11f0-a8dc-93c15fe68710.jpg"/>
+</item>
+<item>
+<title>The best players who never won Afcon?</title>
+<description>
+As two-time runner-up Mohamed Salah begins another tilt at the Africa Cup of Nations, BBC Sport Africa profiles top stars who never lifted the trophy.
+</description>
+<link>
+</link>
+<guid isPermaLink="false">
+https://www.bbc.com/sport/football/videos/c1dz1d7r9vno#5
+</guid>
+<pubDate>Sat, 27 Dec 2025 09:04:48 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/84c2/live/9d6d0fe0-e019-11f0-b67b-690eb873de1b.jpg"/>
+</item>
+<item>
+<title>
+Ros Atkins on… The alleged links between the UAE and Sudan's civil war
+</title>
+<description>
+BBC Analysis Editor Ros Atkins examines allegations of links between the UAE and Sudan’s RSF in the civil war, as international efforts continue to seek an end to the fighting.
+</description>
+<link>
+https://www.bbc.com/news/videos/cly5p1vkm39o?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/videos/cly5p1vkm39o#5</guid>
+<pubDate>Fri, 19 Dec 2025 16:16:15 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/e06f/live/67365f80-dcea-11f0-aae2-2191c0e48a3b.png"/>
+</item>
+<item>
+<title>
+People in Benin felt 'total fear' at attempted coup
+</title>
+<description>
+Residents of the main city express shock after soldiers tried to overthrow the president.
+</description>
+<link>
+https://www.bbc.com/news/videos/c9qenv20lq5o?at_medium=RSS&at_campaign=rss
+</link>
+<guid isPermaLink="false">https://www.bbc.com/news/videos/c9qenv20lq5o#5</guid>
+<pubDate>Mon, 08 Dec 2025 11:07:54 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/ca92/live/8d8641f0-d425-11f0-8c06-f5d460985095.jpg"/>
+</item>
+</channel>
 </rss>`;
 
   return rssXml;
