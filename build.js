@@ -541,6 +541,10 @@ async function build() {
     "src/assets/icons/favicon.ico",
     `${CONFIG.OUTPUT_DIR}/favicon.ico`,
   );
+  await promises.copyFile(
+    "src/assets/icons/apple-touch-icon.png",
+    `${CONFIG.OUTPUT_DIR}/apple-touch-icon.png`,
+  );
 
   console.log("Blog build completed successfully!");
   console.log(
