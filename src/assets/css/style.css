@@ -418,10 +418,12 @@ code {
   }
 
   .post-nav-container {
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: between;
     align-items: center;
-    gap: 15px;
+    gap: 0;
     height: auto;
+    width: 100%;
   }
 
   .post-nav-left,
