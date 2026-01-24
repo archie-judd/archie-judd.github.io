@@ -417,21 +417,6 @@ code {
     font-size: 1.6rem;
   }
 
-  .post-nav-container {
-    flex-direction: row;
-    justify-content: between;
-    align-items: center;
-    gap: 0;
-    height: auto;
-    width: 100%;
-  }
-
-  .post-nav-left,
-  .post-nav-right {
-    position: static;
-    transform: none;
-  }
-
   .nav-button {
     display: block;
     text-align: center;
