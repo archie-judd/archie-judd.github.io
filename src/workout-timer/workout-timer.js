@@ -344,19 +344,15 @@ const speak = async (text, pauseBeforeMs = null) => {
   if (pauseBeforeMs !== null) {
     await new Promise((r) => setTimeout(r, pauseBeforeMs));
   }
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (!voice) console.warn("No voice available for speech synthesis.");
     if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     if (voice) utterance.voice = voice;
     utterance.onend = () => resolve(undefined);
     utterance.onerror = (error) => {
-      if (error.error === "canceled") {
-        reject(new Error("canceled")); // <-- reject instead of resolve
-      } else {
-        console.warn("Speech synthesis error:", error);
-        resolve(undefined);
-      }
+      console.warn("Speech synthesis error:", error);
+      resolve(undefined);
     };
     speechSynthesis.speak(utterance);
   });
