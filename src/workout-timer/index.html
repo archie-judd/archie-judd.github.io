@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Workout Timer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="/workout-timer/workout-timer.js" defer></script>
+    <style>
+      :root {
+        /* Base colors */
+        --bg: #000000;
+        --bg-secondary: #111111;
+        --text-primary: #e0e0e0;
+        --text-secondary: #555555;
+        --text-muted: #666666;
+
+        /* Borders */
+        --border-light: #333333;
+        --border-dark: #222222;
+
+        /* Action colors */
+        --color-active: #00ff41;
+        --color-rest: #ffb700;
+
+        /* State-specific text colors */
+        --text-in-progress: #e0e0e0;
+        --text-paused: #666666;
+        --text-done: #666666;
+        --text-transition: #666666;
+        --text-transition-timer: #444444;
+      }
+
+      body {
+        background-color: var(--bg);
+        color: var(--text-primary);
+        font-family: "IBM Plex Mono", "Courier New", Courier, monospace;
+        margin: 0;
+        height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* --- EDITOR VIEW --- */
+      #editor-view {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      h1 {
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--text-secondary);
+        margin: 0 0 10px 0;
+        border-bottom: 1px solid var(--border-light);
+        padding-bottom: 10px;
+      }
+
+      textarea {
+        background: var(--bg-secondary);
+        color: var(--color-active);
+        border: 1px solid var(--border-light);
+        flex-grow: 1;
+        font-family: inherit;
+        font-size: 16px;
+        padding: 15px;
+        resize: none;
+        border-radius: 4px;
+        outline: none;
+        margin-bottom: 20px;
+        line-height: 1.4;
+        caret-color: var(--color-active);
+      }
+
+      textarea {
+        -webkit-appearance: none;
+      }
+
+      .btn-primary {
+        background: var(--color-active);
+        color: var(--bg);
+        border: none;
+        padding: 20px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        cursor: pointer;
+        border-radius: 4px;
+        font-family: inherit;
+      }
+
+      .btn-primary:active {
+        opacity: 0.8;
+      }
+
+      /* --- WORKOUT VIEW --- */
+      #workout-view {
+        display: none;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .top-bar {
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-dark);
+        position: relative;
+      }
+
+      .text-btn {
+        background: none;
+        border: 1px solid var(--border-light);
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.8rem;
+        cursor: pointer;
+        padding: 8px 12px;
+        text-transform: uppercase;
+        border-radius: 4px;
+      }
+
+      #elapsed-time {
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        font-variant-numeric: tabular-nums;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .main-display {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        position: relative;
+      }
+
+      #current-exercise {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        padding: 0 20px;
+        line-height: 1.2;
+      }
+
+      #timer-display {
+        font-size: 20vw;
+        font-weight: bold;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+        margin: 20px 0;
+      }
+
+      #rep-display {
+        font-size: 20vw;
+        font-weight: bold;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+        margin: 20px 0;
+      }
+
+      .status-indicator {
+        font-size: 1rem;
+        color: var(--color-active);
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        margin-bottom: 10px;
+      }
+
+      #next-indicator {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        margin-top: 10px;
+      }
+
+      /* --- PROGRESS BAR --- */
+      #progress-bar-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--border-dark);
+        display: none;
+      }
+
+      #progress-bar {
+        height: 100%;
+        background: var(--color-active);
+        width: 0%;
+        transition: width 0.3s linear;
+      }
+
+      /* --- CONTROLS --- */
+      .controls {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        gap: 10px;
+        padding: 20px;
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border-light);
+        padding-bottom: max(20px, env(safe-area-inset-bottom));
+      }
+
+      .control-btn {
+        background: transparent;
+        border: 1px solid var(--text-secondary);
+        color: var(--text-primary);
+        padding: 15px 0;
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 4px;
+        text-transform: uppercase;
+      }
+
+      .control-btn:active {
+        background: var(--border-light);
+      }
+
+      #play-pause-btn {
+        background: var(--color-active);
+        color: var(--bg);
+        border: none;
+      }
+
+      #play-pause-btn:disabled {
+        background: var(--text-secondary);
+        color: var(--border-light);
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      /* State Colors */
+      .state-work #timer-display,
+      .state-work #current-exercise {
+        color: var(--text-in-progress);
+      }
+      .state-paused {
+        opacity: 0.4;
+      }
+
+      .state-paused #timer-display,
+      .state-paused #rep-display,
+      .state-paused #current-exercise,
+      .state-paused .status-indicator,
+      .state-paused #next-indicator {
+        color: var(--text-paused);
+      }
+
+      /* GET READY state - visually distinctive with dull text */
+      .state-transition #timer-display {
+        color: var(--text-transition-timer);
+      }
+      .state-transition #current-exercise {
+        color: var(--text-transition);
+        font-size: 2rem;
+      }
+      .state-transition .status-indicator {
+        color: var(--text-transition);
+      }
+      .state-transition #next-indicator {
+        color: var(--text-transition);
+      }
+      .state-transition #progress-bar {
+        background: var(--text-transition);
+      }
+
+      /* Final State: Grey DONE */
+      .state-done #timer-display {
+        color: var(--text-done);
+        font-size: 20vw;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="editor-view">
+      <h1>WORKOUT LOG</h1>
+      <textarea
+        id="input-text"
+        placeholder="# Warm Up
+Jumping Jacks | 30s
+Rest | 10s
+
+# Main Set
+Squats | 10
+Rest | 60s"
+      ></textarea>
+      <button id="start-btn" class="btn-primary">START</button>
+    </div>
+
+    <div id="workout-view">
+      <div class="top-bar">
+        <button id="stop-btn" class="text-btn">STOP / EDIT</button>
+        <span id="elapsed-time">00:00</span>
+        <span id="progress-indicator">1 / 10</span>
+      </div>
+
+      <div class="main-display" id="display-container">
+        <div id="status-text" class="status-indicator">GET READY</div>
+        <div id="current-exercise">PREPARE</div>
+        <div id="timer-display">00</div>
+        <div id="rep-display">DONE</div>
+        <div id="next-indicator">NEXT: ...</div>
+        <div id="progress-bar-container">
+          <div id="progress-bar"></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="prev-btn" class="control-btn">&lt;</button>
+        <button id="play-pause-btn" class="control-btn">PAUSE</button>
+        <button id="next-btn" class="control-btn">&gt;</button>
+      </div>
+    </div>
+  </body>
+</html>

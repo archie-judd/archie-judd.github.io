@@ -534,6 +534,10 @@ async function build() {
   await buildAboutPage(templates, data);
   await buildArchivePage(templates, data);
   await buildRSSFeed(data);
+  await copyDirectory(
+    "src/workout-timer",
+    `${CONFIG.OUTPUT_DIR}/workout-timer`,
+  );
   await copyDirectory("src/assets", `${CONFIG.OUTPUT_DIR}/assets`);
   await promises.copyFile("src/CNAME", `${CONFIG.OUTPUT_DIR}/CNAME`);
   await promises.copyFile("src/robots.txt", `${CONFIG.OUTPUT_DIR}/robots.txt`);
