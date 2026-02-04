@@ -1,0 +1,615 @@
+:root {
+  --bg: #000000;
+  --bg-secondary: #111111;
+  --text-primary: #e0e0e0;
+  --text-secondary: #555555;
+  --text-dimmed: #666666;
+  --text-dimmed-darker: #444444;
+  --text-rest: #aa7777;
+  --border-light: #333333;
+  --border-dark: #222222;
+  --color-accent: rgba(0, 255, 65, 1);
+  --error-bg: #cc0000;
+  --error-text: #ffffff;
+  --error-border: #990000;
+  --syntax-header: #00ff41;
+  --syntax-comment: #666666;
+  --syntax-exercise: #e0e0e0;
+  --syntax-duration: #00bfff;
+  --syntax-modifier: #ffa500;
+  --syntax-section: #00bfff;
+}
+
+@keyframes pulse-neon-border {
+  0%,
+  100% {
+    border-color: rgba(0, 255, 65, 0.3);
+  }
+  50% {
+    border-color: rgba(0, 255, 65, 0.05);
+  }
+}
+
+@font-face {
+  font-family: "DSEG7";
+  src: url("/workout-timer/fonts/dseg7-classic-latin-700-normal.woff2")
+    format("woff2");
+  font-weight: bold;
+  font-style: normal;
+}
+
+body {
+  touch-action: manipulation;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: "IBM Plex Mono", "Courier New", Courier, monospace;
+  margin: 0;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* --- ERROR BANNER --- */
+#error-banner {
+  display: none;
+  background: var(--error-bg);
+  color: var(--error-text);
+  padding: 12px 20px;
+  text-align: center;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--error-border);
+}
+
+/* --- EDITOR VIEW --- */
+#editor-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.editor-container {
+  position: relative;
+  flex-grow: 1;
+  border-radius: 4px;
+  border: 1px solid var(--border-light);
+  background: var(--bg-secondary);
+}
+
+.editor-container textarea,
+.editor-container .highlight-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 15px;
+  margin: 0;
+  border: none;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.editor-container textarea {
+  color: transparent;
+  caret-color: var(--color-accent);
+  background: transparent;
+  resize: none;
+  z-index: 2;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.editor-container textarea::placeholder {
+  color: var(--text-dimmed);
+  opacity: 0.5;
+}
+
+.editor-container .highlight-overlay {
+  z-index: 1;
+  color: var(--text-primary);
+  pointer-events: none;
+}
+
+/* Syntax highlighting */
+.syntax-header {
+  color: var(--syntax-header);
+  font-weight: bold;
+}
+.syntax-section {
+  color: var(--syntax-section);
+  font-weight: bold;
+}
+.syntax-comment {
+  color: var(--syntax-comment);
+  font-style: italic;
+}
+.syntax-exercise {
+  color: var(--syntax-exercise);
+}
+.syntax-duration {
+  color: var(--syntax-duration);
+  font-weight: 600;
+}
+.syntax-modifier {
+  color: var(--syntax-modifier);
+  font-style: italic;
+}
+.syntax-separator {
+  color: var(--text-dimmed);
+}
+.syntax-error {
+  text-decoration: wavy underline;
+  text-decoration-color: #ff4444;
+}
+.syntax-rest {
+  color: var(--text-rest);
+  font-style: italic;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--bg);
+  border: none;
+  padding: 12px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.btn-primary:active {
+  opacity: 0.8;
+}
+
+/* Editor view: mirror workout layout */
+.editor-elapsed {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  font-family: "DSEG7", monospace;
+  opacity: 0.3;
+}
+
+.editor-progress-bar-container {
+  display: none;
+}
+
+#editor-view .main-display {
+  display: flex;
+  padding: 0;
+  justify-items: stretch;
+  text-align: left;
+}
+
+#editor-view .editor-container {
+  flex-grow: 1;
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  border-left: none;
+  border-right: none;
+}
+
+#editor-view .controls {
+  border-top: 1px solid var(--border-light);
+}
+
+#start-btn {
+  background: var(--color-accent);
+  color: var(--bg);
+  border: none;
+  text-transform: uppercase;
+}
+
+/* --- WORKOUT VIEW --- */
+#workout-view {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+}
+
+.top-bar {
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.top-bar-btn {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 10px 16px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  text-align: center;
+  min-width: 11ch;
+}
+
+.stop-btn {
+  background: var(--error-bg);
+  border: 1.5px solid var(--error-border);
+  color: var(--error-text);
+}
+
+.stop-btn:active {
+  background: var(--error-border);
+  border-color: var(--error-bg);
+}
+
+.stop-btn:disabled {
+  background: var(--bg-secondary);
+  border-color: var(--border-light);
+  color: var(--text-dimmed);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+#elapsed-time {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: "DSEG7", monospace;
+  line-height: 1.2;
+}
+
+.mute-btn {
+  background: var(--bg-secondary);
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+}
+
+/* --- SECTION INDICATOR --- */
+#section-indicator {
+  display: block;
+  text-align: center;
+  padding: 6px 20px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--color-accent);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-dark);
+}
+
+/* --- MAIN DISPLAY --- */
+.main-display {
+  flex-grow: 1;
+  display: grid;
+  grid-template-rows: 1.5fr auto 1fr;
+  justify-items: center;
+  text-align: center;
+  position: relative;
+  padding: 0 20px;
+}
+
+.main-display[data-tappable="true"] {
+  cursor: pointer;
+  border: 3px solid var(--color-accent);
+  animation: pulse-neon-border 2s ease-in-out infinite;
+}
+
+#exercise-status {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  height: 100%;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 0 20px;
+  line-height: 1.3;
+  margin: 0;
+  align-self: center;
+}
+
+#exercise-name {
+  font-size: 2rem;
+  color: var(--text-primary);
+  font-weight: bold;
+  display: none;
+}
+
+#exercise-get-ready {
+  font-size: 1rem;
+  color: var(--text-dimmed);
+  font-weight: normal;
+  display: none;
+}
+
+#exercise-detail {
+  font-size: 1rem;
+  color: var(--text-dimmed);
+  font-weight: normal;
+  display: none;
+}
+
+#exercise-get-ready:not(:empty),
+#exercise-name:not(:empty),
+#exercise-detail:not(:empty) {
+  display: block;
+}
+
+#timer-display {
+  font-family: "DSEG7", monospace;
+  font-weight: normal;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  font-size: 28vw;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+#next-indicator {
+  color: var(--text-dimmed);
+  font-size: 1rem;
+  letter-spacing: 1px;
+  align-self: center;
+}
+
+#progress-bar-container {
+  height: 6px;
+  background: var(--border-dark);
+}
+
+#progress-bar {
+  height: 100%;
+  background: var(--color-accent);
+  width: 0%;
+  transition: width 0.3s linear;
+}
+
+/* --- CONTROLS --- */
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 10px;
+  padding: 20px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-light);
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+}
+
+.control-btn {
+  background: transparent;
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+  padding: 15px 0;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.control-btn:active {
+  background: var(--border-light);
+}
+
+.control-btn:disabled {
+  border-color: var(--border-dark);
+  color: var(--text-dimmed);
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+#play-pause-btn {
+  background: var(--color-accent);
+  color: var(--bg);
+  border: none;
+  text-transform: uppercase;
+}
+
+#play-pause-btn:disabled {
+  background: var(--text-secondary);
+  color: var(--border-light);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* --- STATE STYLES --- */
+.state-paused {
+  opacity: 0.4;
+}
+
+.state-paused #timer-display,
+.state-paused #exercise-status,
+.state-paused #exercise-detail,
+.state-paused #next-indicator {
+  color: var(--text-dimmed);
+}
+
+.state-transition #timer-display {
+  color: var(--text-dimmed-darker);
+}
+
+.state-transition #exercise-status {
+  color: var(--text-primary);
+}
+
+.state-done #timer-display {
+  color: var(--text-dimmed);
+  opacity: 0.3;
+}
+
+/* --- RESPONSIVE TIMER SIZING (portrait) --- */
+#timer-display[data-length="1"],
+#timer-display[data-length="2"] {
+  font-size: clamp(10rem, 45vw, 260px);
+}
+
+#timer-display[data-length="3"] {
+  font-size: clamp(8rem, 30vw, 200px);
+}
+
+#timer-display[data-length="4"],
+#timer-display[data-length="5"] {
+  font-size: clamp(6rem, 20vw, 160px);
+}
+
+/* ============================
+   DESKTOP: limit max width
+   ============================ */
+@media (min-width: 768px) and (orientation: landscape) {
+  body {
+    max-width: 500px;
+    margin: 0 auto;
+    border-left: 1px solid var(--border-dark);
+    border-right: 1px solid var(--border-dark);
+  }
+
+  #timer-display {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  #timer-display[data-length="4"],
+  #timer-display[data-length="5"] {
+    font-size: clamp(4rem, 16vw, 120px);
+  }
+
+  #timer-display[data-length="3"] {
+    font-size: clamp(6rem, 24vw, 160px);
+  }
+}
+
+/* ============================
+   MOBILE LANDSCAPE
+   Targets phones in landscape via short viewport height
+   ============================ */
+@media (max-height: 500px) and (orientation: landscape) {
+  body {
+    max-width: none;
+    margin: 0;
+    border: none;
+  }
+
+  /* Tighten top bar */
+  .top-bar {
+    padding: 6px 16px;
+  }
+
+  .top-bar-btn {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    min-width: auto;
+  }
+
+  #elapsed-time {
+    font-size: 1rem;
+  }
+
+  /* Compact section indicator */
+  #section-indicator {
+    padding: 4px 16px;
+    font-size: 0.85rem;
+  }
+
+  /* --- Core: side-by-side main display --- */
+  .main-display {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "info  timer"
+      "next  timer";
+    align-items: center;
+    padding: 0 24px;
+    gap: 0;
+  }
+
+  /* Left top: exercise info */
+  #exercise-status {
+    grid-area: info;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    padding: 0 14px;
+    text-align: left;
+    justify-content: flex-end;
+    align-self: end;
+    padding-bottom: 10px;
+  }
+
+  #exercise-name {
+    font-size: 1.9rem;
+  }
+
+  #exercise-get-ready {
+    font-size: 1.1rem;
+  }
+
+  #exercise-detail {
+    font-size: 1.1rem;
+  }
+
+  /* Timer on the right, spanning both rows, right-aligned */
+  #timer-display {
+    grid-area: timer;
+    align-self: center;
+    justify-self: center;
+  }
+
+  /* Override portrait data-length sizes — bigger for landscape */
+  #timer-display[data-length="1"],
+  #timer-display[data-length="2"] {
+    font-size: clamp(7rem, 40vh, 16rem);
+  }
+
+  #timer-display[data-length="3"] {
+    font-size: clamp(5.5rem, 32vh, 12rem);
+  }
+
+  #timer-display[data-length="4"],
+  #timer-display[data-length="5"] {
+    font-size: clamp(4.5rem, 25vh, 10rem);
+  }
+
+  /* Left bottom: next indicator */
+  #next-indicator {
+    grid-area: next;
+    text-align: left;
+    font-size: 1.15rem;
+    padding: 0 14px;
+    align-self: start;
+    padding-top: 10px;
+  }
+
+  /* Slim down controls */
+  .controls {
+    padding: 8px 16px;
+    gap: 8px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+
+  .control-btn {
+    padding: 12px 0;
+    font-size: 0.95rem;
+  }
+
+  /* Thinner progress bar */
+  #progress-bar-container {
+    height: 4px;
+  }
+
+  /* Keep editor textarea layout in landscape */
+  #editor-view .main-display {
+    display: flex;
+    grid-template-rows: none;
+    grid-template-columns: none;
+    grid-template-areas: none;
+    padding: 0;
+  }
+}

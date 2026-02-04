@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Workout Timer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Bungee&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/workout-timer/workout-timer.css" />
+    <script src="/workout-timer/workout-timer.js" defer></script>
+  </head>
+  <body>
+    <div id="error-banner" class="error-banner"></div>
+    <div id="editor-view">
+      <div class="top-bar">
+        <button id="delete-workout-btn" class="top-bar-btn stop-btn">
+          DELETE
+        </button>
+        <span id="editor-section-indicator" class="editor-elapsed">1/1</span>
+        <button id="new-workout-btn" class="top-bar-btn mute-btn">NEW</button>
+      </div>
+      <div class="main-display">
+        <div class="editor-container">
+          <div class="highlight-overlay" id="highlightOverlay"></div>
+          <textarea
+            id="input-text"
+            spellcheck="false"
+            placeholder="Type your workout...
+# Morning Routine
+Jumping Jacks | 30s // stay light on your feet
+Rest | 10s
+Arm Circles | 1m
+
+## Main Set
+Lunges | 20 | each side // keep your knee behind your toes
+Rest | 60s
+Push-ups | 45s // chest to the floor
+Rest | 30s
+Squats | 1m30s
+Rest | 1m, 30s
+
+## Cool Down
+Walking | 2m
+Stretching | 3m"
+          ></textarea>
+        </div>
+      </div>
+      <div class="editor-progress-bar-container"></div>
+      <div class="controls">
+        <button id="editor-prev-btn" class="control-btn">&lt;-</button>
+        <button id="start-btn" class="control-btn">START</button>
+        <button id="editor-next-btn" class="control-btn">-&gt;</button>
+      </div>
+    </div>
+
+    <div id="workout-view">
+      <div class="top-bar">
+        <button id="stop-btn" class="top-bar-btn stop-btn">STOP</button>
+        <span id="elapsed-time">00:00</span>
+        <button id="mute-btn" class="top-bar-btn mute-btn" data-muted="false">
+          MUTE
+        </button>
+      </div>
+      <div id="section-indicator"></div>
+      <div class="main-display" id="display-container">
+        <div id="exercise-status" class="exercise-status">
+          <span id="exercise-get-ready"></span>
+          <span id="exercise-name">Exercise Name</span>
+          <span id="exercise-detail">Status Detail</span>
+        </div>
+        <div id="timer-display" data-length="2">00</div>
+        <div id="next-indicator">Next: ...</div>
+      </div>
+      <div id="progress-bar-container">
+        <div id="progress-bar"></div>
+      </div>
+      <div class="controls">
+        <button id="prev-btn" class="control-btn">&lt;-</button>
+        <button id="play-pause-btn" class="control-btn">PAUSE</button>
+        <button id="next-btn" class="control-btn">-&gt;</button>
+      </div>
+    </div>
+
+    <script>
+      const timerDisplay = document.getElementById("timer-display");
+      if (timerDisplay) {
+        new MutationObserver(() => {
+          timerDisplay.setAttribute(
+            "data-length",
+            String(timerDisplay.textContent.trim().length),
+          );
+        }).observe(timerDisplay, {
+          childList: true,
+          characterData: true,
+          subtree: true,
+        });
+      }
+    </script>
+  </body>
+</html>
