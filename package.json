@@ -6,7 +6,7 @@
   "main": "build.js",
   "scripts": {
     "build": "node build.js",
-    "serve": "npx serve docs",
+    "serve": "npx serve dist",
     "dev": "nodemon --exec 'npm run build && npm run serve' --ext js,yml,css,html,md --watch build.js --watch src/ ",
     "clean": "rm -rf docs"
   },
