@@ -322,6 +322,16 @@ const ensureSpeechUnlocked = () => {
   }
 };
 
+document.addEventListener(
+  "click",
+  () => {
+    try {
+      ensureSpeechUnlocked();
+    } catch (_) {}
+  },
+  { once: true },
+);
+
 const loadVoice = () => {
   const voices = window.speechSynthesis.getVoices();
   if (voices.length > 0) {
@@ -341,24 +351,22 @@ const loadVoice = () => {
  * @param {function(): boolean} [cancelOn] - Optional function to cancel speech early
  */
 const speak = async (text, pauseBeforeMs = null, cancelOn = null) => {
-  if (isMuted) return;
   if (pauseBeforeMs !== null) {
     await new Promise((r) => setTimeout(r, pauseBeforeMs));
   }
   if (cancelOn !== null) {
     if (cancelOn() === true) {
-      console.log("Speech cancelled before start");
       return;
     }
   }
+  if (isMuted) return;
   return new Promise((resolve) => {
     if (!voice) console.warn("No voice available for speech synthesis.");
     if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     if (voice) utterance.voice = voice;
     const checkInterval = setInterval(() => {
-      if (cancelOn !== null && cancelOn() === true) {
-        console.log("Speech cancelled mid-playback");
+      if ((cancelOn !== null && cancelOn() === true) || isMuted) {
         window.speechSynthesis.cancel();
         clearInterval(checkInterval);
       }
@@ -370,6 +378,19 @@ const speak = async (text, pauseBeforeMs = null, cancelOn = null) => {
     };
     speechSynthesis.speak(utterance);
   });
+};
+
+/**
+ * Speak a sequence of texts, chained sequentially with pauses between them.
+ * Returns immediately (fire-and-forget). Cancelled via the cancelOn callback.
+ * @param {Array<{ text: string, pauseBeforeMs: number | null }>} parts
+ * @param {function(): boolean} [cancelOn]
+ */
+const speakSequence = async (parts, cancelOn = null) => {
+  for (const part of parts) {
+    await speak(part.text, part.pauseBeforeMs, cancelOn);
+    if (cancelOn?.() === true) return;
+  }
 };
 
 const cancelSpeech = () => {
@@ -849,6 +870,7 @@ const displayEditing = () => {
   DOM.editorView.style.display = "flex";
   DOM.workoutView.style.display = "none";
   DOM.displayContainer.dataset.tappable = "false";
+  DOM.startBtn.disabled = false;
   updateEditorUI();
 };
 
@@ -1040,8 +1062,6 @@ const releaseScreenWakeLock = () => {
 
 const startWorkout = async () => {
   hideError();
-  ensureSpeechUnlocked();
-
   saveCurrentWorkoutText();
   state.workoutData = parseWorkout(DOM.inputText.value);
 
@@ -1052,11 +1072,11 @@ const startWorkout = async () => {
   }
 
   await acquireScreenWakeLock();
-  await beginWorkoutFromStart(state);
+  beginWorkoutFromStart(state);
 };
 
 /** @param {State} state */
-const beginWorkoutFromStart = async (state) => {
+const beginWorkoutFromStart = (state) => {
   state.stepIndex = 0;
   state.status = STATUS.IN_PROGRESS;
   state.workoutStartTime = Date.now();
@@ -1073,13 +1093,7 @@ const beginWorkoutFromStart = async (state) => {
 
   updateDisplay(state);
   startTickTimer(state);
-
-  if (state.workoutData.title) {
-    await speak(state.workoutData.title);
-    await new Promise((r) => setTimeout(r, 400));
-  }
-
-  await enterCurrentStep(state);
+  enterCurrentStep(state);
 };
 
 /** @param {State} state */
@@ -1106,44 +1120,24 @@ const finishWorkout = (state) => {
  * Announce the current step with speech (without resetting step state)
  * @param {State} state
  */
-const announceCurrentStep = async (state) => {
+const announceCurrentStep = (state) => {
   const entryTimestamp = state.stepEntryTime;
   const step = getCurrentStep(state);
+  const cancelOn = () => !isStillOnStep(state, entryTimestamp);
 
+  const titleParts =
+    state.stepIndex === 0 && state.workoutData.title
+      ? [{ text: state.workoutData.title, pauseBeforeMs: null }]
+      : [];
   const speechParts = buildStepSpeechParts(step, state);
-  try {
-    for (const part of speechParts) {
-      if (part.blocking) {
-        await speak(
-          part.text,
-          part.pauseBeforeMs,
-          () => !isStillOnStep(state, entryTimestamp),
-        );
-      } else {
-        speak(
-          part.text,
-          part.pauseBeforeMs,
-          () => !isStillOnStep(state, entryTimestamp),
-        );
-      }
-    }
-  } catch (error) {
-    if (error.message === "canceled") {
-      return;
-    } else {
-      console.warn("Speech error during step announcement:", error);
-    }
-  }
+  const noteParts =
+    (step.type === "exercise" || step.type === "rest") && step.notes
+      ? [{ text: step.notes, pauseBeforeMs: 500 }]
+      : [];
 
-  if (!isStillOnStep(state, entryTimestamp)) return;
+  speakSequence([...titleParts, ...speechParts, ...noteParts], cancelOn);
 
-  state.stepResumedAt = Date.now();
   state.stepAnnounced = true;
-
-  if ((step.type === "exercise" || step.type === "rest") && step.notes) {
-    speak(step.notes, 1000, () => !isStillOnStep(state, entryTimestamp));
-  }
-
   if (!state.mainTimer) startTickTimer(state);
 };
 
@@ -1151,7 +1145,7 @@ const announceCurrentStep = async (state) => {
  * Initialize and enter the step at the current stepIndex.
  * @param {State} state
  */
-const enterCurrentStep = async (state) => {
+const enterCurrentStep = (state) => {
   if (state.stepIndex >= state.workoutData.steps.length) {
     finishWorkout(state);
     return;
@@ -1163,15 +1157,15 @@ const enterCurrentStep = async (state) => {
 
   state.stepEntryTime = Date.now();
   const step = getCurrentStep(state);
-  state.stepResumedAt = 0;
   state.stepElapsedMs = 0;
   state.stepAnnounced = false;
   state.lastAnnouncedSecond = -1;
   state.stepDuration = getStepDuration(step);
+  state.stepResumedAt = Date.now();
   updateDisplay(state);
 
   if (state.status === STATUS.IN_PROGRESS) {
-    await announceCurrentStep(state);
+    announceCurrentStep(state);
   }
 };
 
@@ -1188,7 +1182,7 @@ const isStillOnStep = (state, entryTimestamp) =>
  * Build an array of speech instructions for a step.
  * @param {Exercise | Transition | Rest} step
  * @param {State} state
- * @returns {Array<{ text: string, blocking: boolean, pauseBeforeMs: number | null }>}
+ * @returns {Array<{ text: string, pauseBeforeMs: number | null }>}
  */
 const buildStepSpeechParts = (step, state) => {
   if (step.type === "transition") {
@@ -1202,13 +1196,7 @@ const buildStepSpeechParts = (step, state) => {
             : next.name;
       const prefix =
         step.kind === "changeSides" ? "Switch to" : "Get ready for";
-      return [
-        {
-          text: `${prefix} ${sideSuffix}`,
-          blocking: false,
-          pauseBeforeMs: null,
-        },
-      ];
+      return [{ text: `${prefix} ${sideSuffix}`, pauseBeforeMs: null }];
     }
     return [];
   }
@@ -1216,31 +1204,22 @@ const buildStepSpeechParts = (step, state) => {
   if (step.type === "exercise") {
     if (step.volume.unit === "reps") {
       return [
-        {
-          text: `${step.volume.value} reps`,
-          blocking: true,
-          pauseBeforeMs: null,
-        },
-        { text: "Go!", blocking: true, pauseBeforeMs: 400 },
-        { text: "Tap when done", blocking: true, pauseBeforeMs: 700 },
+        { text: `${step.volume.value} reps`, pauseBeforeMs: null },
+        { text: "Go!", pauseBeforeMs: 400 },
+        { text: "Tap when done", pauseBeforeMs: 400 },
       ];
     }
     return [
-      {
-        text: formatDurationForSpeech(step.volume.value),
-        blocking: true,
-        pauseBeforeMs: null,
-      },
-      { text: "Go!", blocking: false, pauseBeforeMs: 400 },
+      { text: formatDurationForSpeech(step.volume.value), pauseBeforeMs: null },
+      { text: "Go!", pauseBeforeMs: 400 },
     ];
   }
 
   if (step.type === "rest") {
     return [
-      { text: "Rest for", blocking: true, pauseBeforeMs: null },
+      { text: "Rest for", pauseBeforeMs: null },
       {
         text: formatDurationForSpeech(step.durationSeconds),
-        blocking: false,
         pauseBeforeMs: 400,
       },
     ];
@@ -1250,12 +1229,12 @@ const buildStepSpeechParts = (step, state) => {
 };
 
 /** @param {State} state */
-const advanceToNextStep = async (state) => {
+const advanceToNextStep = (state) => {
   state.stepIndex++;
   if (state.stepIndex >= state.workoutData.steps.length) {
     finishWorkout(state);
   } else {
-    await enterCurrentStep(state);
+    enterCurrentStep(state);
   }
 };
 
@@ -1288,7 +1267,7 @@ const findPrevBreakpointIndex = (state) => {
 // --- USER CONTROLS ---
 
 /** @param {State} state */
-const togglePause = async (state) => {
+const togglePause = (state) => {
   if (state.status === STATUS.DONE) {
     state.status = STATUS.EDITING;
     displayEditing();
@@ -1303,14 +1282,13 @@ const togglePause = async (state) => {
     state.status = STATUS.IN_PROGRESS;
     // If we paused before step speech completed, trigger it now
     if (!state.stepAnnounced) {
-      await announceCurrentStep(state);
+      announceCurrentStep(state);
     } else {
       state.stepResumedAt = Date.now();
     }
     startTickTimer(state);
   } else if (state.status === STATUS.IN_PROGRESS) {
     cancelSpeech();
-    isMuted = true;
     if (state.stepResumedAt > 0) {
       const rawMs = state.stepElapsedMs + (Date.now() - state.stepResumedAt);
       state.stepElapsedMs = Math.floor(rawMs / 1000) * 1000;
@@ -1325,7 +1303,7 @@ const togglePause = async (state) => {
 };
 
 /** @param {State} state */
-const skipToNextExercise = async (state) => {
+const skipToNextExercise = (state) => {
   cancelSpeech();
   const nextIndex = findNextBreakpointIndex(state);
   if (nextIndex >= state.workoutData.steps.length) {
@@ -1333,7 +1311,7 @@ const skipToNextExercise = async (state) => {
   } else {
     state.stepIndex = nextIndex;
     if (state.status === STATUS.IN_PROGRESS) {
-      await enterCurrentStep(state);
+      enterCurrentStep(state);
     } else {
       // Just update display without speech/timer when paused
       state.stepElapsedMs = 0;
@@ -1349,7 +1327,7 @@ const skipToNextExercise = async (state) => {
 };
 
 /** @param {State} state */
-const skipToPrevExercise = async (state) => {
+const skipToPrevExercise = (state) => {
   cancelSpeech();
   const elapsedSinceEntry = Math.floor(
     (Date.now() - state.stepEntryTime) / 1000,
@@ -1360,7 +1338,7 @@ const skipToPrevExercise = async (state) => {
   }
 
   if (state.status === STATUS.IN_PROGRESS) {
-    await enterCurrentStep(state);
+    enterCurrentStep(state);
   } else {
     // Just update display without speech/timer when paused
     state.stepElapsedMs = 0;
@@ -1522,28 +1500,28 @@ DOM.playPauseBtn.addEventListener("click", () => {
   }
 });
 
-DOM.prevBtn.addEventListener("click", async () => {
+DOM.prevBtn.addEventListener("click", () => {
   try {
-    await skipToPrevExercise(state);
+    skipToPrevExercise(state);
   } catch (e) {
     console.error("Error going to previous:", e);
     showError(e.message);
   }
 });
 
-DOM.nextBtn.addEventListener("click", async () => {
+DOM.nextBtn.addEventListener("click", () => {
   try {
-    await skipToNextExercise(state);
+    skipToNextExercise(state);
   } catch (e) {
     console.error("Error going to next:", e);
     showError(e.message);
   }
 });
 
-DOM.timerDisplay.addEventListener("click", async () => {
+DOM.displayContainer.addEventListener("click", () => {
   try {
     if (DOM.displayContainer.dataset.tappable === "true") {
-      await advanceToNextStep(state);
+      advanceToNextStep(state);
     }
   } catch (e) {
     console.error("Error on tap:", e);
@@ -1551,7 +1529,7 @@ DOM.timerDisplay.addEventListener("click", async () => {
   }
 });
 
-document.addEventListener("keydown", async (e) => {
+document.addEventListener("keydown", (e) => {
   try {
     if (state.status === STATUS.EDITING) {
       return;
@@ -1561,19 +1539,19 @@ document.addEventListener("keydown", async (e) => {
         DOM.displayContainer.dataset.tappable === "true"
       ) {
         e.preventDefault();
-        await skipToNextExercise(state);
+        skipToNextExercise(state);
       } else if (e.code === "Escape") {
         e.preventDefault();
         transitionToEditing(state);
       } else if (e.code === "Space") {
-        await togglePause(state);
+        togglePause(state);
         e.preventDefault();
       } else if (e.code === "ArrowRight") {
         e.preventDefault();
-        await skipToNextExercise(state);
+        skipToNextExercise(state);
       } else if (e.code === "ArrowLeft") {
         e.preventDefault();
-        await skipToPrevExercise(state);
+        skipToPrevExercise(state);
       }
     }
   } catch (err) {
