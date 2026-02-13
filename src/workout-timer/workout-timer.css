@@ -175,7 +175,6 @@ body {
   font-size: 0.9rem;
   font-variant-numeric: tabular-nums;
   font-family: "DSEG7", monospace;
-  opacity: 0.3;
 }
 
 .editor-progress-bar-container {
@@ -239,7 +238,7 @@ body {
 
 .stop-btn {
   background: var(--error-bg);
-  border: 1.5px solid var(--error-border);
+  border: 1px solid var(--error-border);
   color: var(--error-text);
 }
 
@@ -265,7 +264,7 @@ body {
 
 .mute-btn {
   background: var(--bg-secondary);
-  border-color: var(--text-secondary);
+  border: 1px solid var(--border-light);
   color: var(--text-primary);
 }
 
@@ -384,7 +383,7 @@ body {
 
 .control-btn {
   background: transparent;
-  border-color: var(--text-secondary);
+  border: 1px solid var(--border-light);
   color: var(--text-primary);
   padding: 15px 0;
   font-family: inherit;
@@ -408,6 +407,7 @@ body {
 
 #play-pause-btn {
   background: var(--color-accent);
+  border: 1px solid var(--color-accent);
   color: var(--bg);
   border: none;
   text-transform: uppercase;
@@ -518,8 +518,8 @@ body {
     font-size: 0.85rem;
   }
 
-  /* --- Core: side-by-side main display --- */
-  .main-display {
+  /* --- Core: side-by-side main display (workout view only) --- */
+  #workout-view .main-display {
     display: grid;
     grid-template-rows: 1fr 1fr;
     grid-template-columns: auto 1fr;
