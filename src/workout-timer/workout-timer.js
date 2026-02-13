@@ -338,17 +338,31 @@ const loadVoice = () => {
  * Speak text aloud, optionally with a pause before speaking.
  * @param {string} text
  * @param {number | null} pauseBeforeMs
+ * @param {function(): boolean} [cancelOn] - Optional function to cancel speech early
  */
-const speak = async (text, pauseBeforeMs = null) => {
+const speak = async (text, pauseBeforeMs = null, cancelOn = null) => {
   if (isMuted) return;
   if (pauseBeforeMs !== null) {
     await new Promise((r) => setTimeout(r, pauseBeforeMs));
+  }
+  if (cancelOn !== null) {
+    if (cancelOn() === true) {
+      console.log("Speech cancelled before start");
+      return;
+    }
   }
   return new Promise((resolve) => {
     if (!voice) console.warn("No voice available for speech synthesis.");
     if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     if (voice) utterance.voice = voice;
+    const checkInterval = setInterval(() => {
+      if (cancelOn !== null && cancelOn() === true) {
+        console.log("Speech cancelled mid-playback");
+        window.speechSynthesis.cancel();
+        clearInterval(checkInterval);
+      }
+    }, 100); // Check every 100ms
     utterance.onend = () => resolve(undefined);
     utterance.onerror = (error) => {
       console.warn("Speech synthesis error:", error);
@@ -1099,11 +1113,18 @@ const announceCurrentStep = async (state) => {
   const speechParts = buildStepSpeechParts(step, state);
   try {
     for (const part of speechParts) {
-      if (!isStillOnStep(state, entryTimestamp)) return;
       if (part.blocking) {
-        await speak(part.text, part.pauseBeforeMs);
+        await speak(
+          part.text,
+          part.pauseBeforeMs,
+          () => !isStillOnStep(state, entryTimestamp),
+        );
       } else {
-        speak(part.text, part.pauseBeforeMs);
+        speak(
+          part.text,
+          part.pauseBeforeMs,
+          () => !isStillOnStep(state, entryTimestamp),
+        );
       }
     }
   } catch (error) {
@@ -1120,9 +1141,7 @@ const announceCurrentStep = async (state) => {
   state.stepAnnounced = true;
 
   if ((step.type === "exercise" || step.type === "rest") && step.notes) {
-    if (isStillOnStep(state, entryTimestamp)) {
-      speak(step.notes, 1000);
-    }
+    speak(step.notes, 1000, () => !isStillOnStep(state, entryTimestamp));
   }
 
   if (!state.mainTimer) startTickTimer(state);
