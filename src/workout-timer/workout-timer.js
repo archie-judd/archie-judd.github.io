@@ -25,7 +25,7 @@ Rest | 10s
 ## Main Set
 Push-ups | 45s // chest to floor
 Rest | 30s
-Squats | 1m | each side
+Lunges | 60 | each side
 
 ## Cool Down
 Stretching | 2m`;
