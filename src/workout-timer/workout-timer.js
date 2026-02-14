@@ -362,18 +362,33 @@ const speak = async (text, pauseBeforeMs = null, cancelOn = null) => {
   if (isMuted) return;
   return new Promise((resolve) => {
     if (!voice) console.warn("No voice available for speech synthesis.");
-    if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+
+    // iOS Safari fix: cancel existing speech and wait a tick
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      // Give iOS Safari time to actually cancel
+      setTimeout(() => {
+        window.speechSynthesis.cancel();
+      }, 0);
+    }
+
     const utterance = new SpeechSynthesisUtterance(text);
     if (voice) utterance.voice = voice;
     const checkInterval = setInterval(() => {
       if ((cancelOn !== null && cancelOn() === true) || isMuted) {
         window.speechSynthesis.cancel();
+        setTimeout(() => window.speechSynthesis.cancel(), 0);
         clearInterval(checkInterval);
+        resolve(undefined);
       }
     }, 100); // Check every 100ms
-    utterance.onend = () => resolve(undefined);
+    utterance.onend = () => {
+      clearInterval(checkInterval);
+      resolve(undefined);
+    };
     utterance.onerror = (error) => {
       console.warn("Speech synthesis error:", error);
+      clearInterval(checkInterval);
       resolve(undefined);
     };
     speechSynthesis.speak(utterance);
@@ -394,7 +409,11 @@ const speakSequence = async (parts, cancelOn = null) => {
 };
 
 const cancelSpeech = () => {
-  if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+  if (window.speechSynthesis) {
+    // iOS Safari requires multiple cancel calls and a small delay
+    window.speechSynthesis.cancel();
+    setTimeout(() => window.speechSynthesis.cancel(), 0);
+  }
 };
 
 // --- TIME FORMATTING ---
@@ -1145,6 +1164,7 @@ const announceCurrentStep = (state) => {
       ? [{ text: step.notes, pauseBeforeMs: 500 }]
       : [];
 
+  console.log("Announcing step:", { titleParts, speechParts, noteParts });
   speakSequence([...titleParts, ...speechParts, ...noteParts], cancelOn);
 
   state.stepAnnounced = true;
