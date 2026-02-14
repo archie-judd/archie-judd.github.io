@@ -841,13 +841,21 @@ const announceCountdownIfNeeded = async (state, timeLeft) => {
       duration >= HALFWAY_ANNOUNCEMENT_MIN_DURATION_S &&
       timeLeft === halfwayPoint
     ) {
-      await speak("Halfway there");
-      speak(`${formatDurationForSpeech(halfwayPoint)} left`, 400);
+      speakSequence(
+        [
+          { text: "Halfway there", pauseBeforeMs: null },
+          {
+            text: `${formatDurationForSpeech(halfwayPoint)} left`,
+            pauseBeforeMs: 400,
+          },
+        ],
+        () => state.status !== STATUS.IN_PROGRESS,
+      );
     }
   }
 
   if (timeLeft <= 3 && timeLeft > 0) {
-    speak(timeLeft.toString());
+    speak(timeLeft.toString(), null, () => state.status !== STATUS.IN_PROGRESS);
   }
 };
 
@@ -1123,7 +1131,9 @@ const finishWorkout = (state) => {
 const announceCurrentStep = (state) => {
   const entryTimestamp = state.stepEntryTime;
   const step = getCurrentStep(state);
-  const cancelOn = () => !isStillOnStep(state, entryTimestamp);
+  const cancelOn = () =>
+    !isStillOnStep(state, entryTimestamp) ||
+    state.status !== STATUS.IN_PROGRESS;
 
   const titleParts =
     state.stepIndex === 0 && state.workoutData.title
