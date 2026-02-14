@@ -1165,6 +1165,7 @@ const enterCurrentStep = (state) => {
     return;
   }
 
+  cancelSpeech();
   state.stepEntryTime = Date.now();
   const step = getCurrentStep(state);
   state.stepElapsedMs = 0;
@@ -1220,7 +1221,7 @@ const buildStepSpeechParts = (step, state) => {
       ];
     }
     return [
-      { text: formatDurationForSpeech(step.volume.value), pauseBeforeMs: null },
+      { text: formatDurationForSpeech(step.volume.value), pauseBeforeMs: 300 },
       { text: "Go!", pauseBeforeMs: 400 },
     ];
   }
