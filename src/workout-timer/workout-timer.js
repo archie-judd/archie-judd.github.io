@@ -1358,25 +1358,29 @@ const advanceToNextStep = (state) => {
 // --- NAVIGATION HELPERS ---
 
 /**
- * Find the index of the next transition or rest step after the current one.
+ * Find the index of the next transition, rest, or rep-based exercise step after the current one.
  * @param {State} state
  */
 const findNextBreakpointIndex = (state) => {
   for (let i = state.stepIndex + 1; i < state.workoutData.steps.length; i++) {
-    const t = state.workoutData.steps[i].type;
+    const step = state.workoutData.steps[i];
+    const t = step.type;
     if (t === "transition" || t === "rest") return i;
+    if (t === "exercise" && step.volume.unit === "reps") return i;
   }
   return state.workoutData.steps.length;
 };
 
 /**
- * Find the index of the previous transition or rest step before the current one.
+ * Find the index of the previous transition, rest, or rep-based exercise step before the current one.
  * @param {State} state
  */
 const findPrevBreakpointIndex = (state) => {
   for (let i = state.stepIndex - 1; i >= 0; i--) {
-    const t = state.workoutData.steps[i].type;
+    const step = state.workoutData.steps[i];
+    const t = step.type;
     if (t === "transition" || t === "rest") return i;
+    if (t === "exercise" && step.volume.unit === "reps") return i;
   }
   return 0;
 };
