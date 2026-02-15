@@ -1094,7 +1094,6 @@ const acquireScreenWakeLock = async () => {
     // Modern browsers with Wake Lock API
     if ("wakeLock" in navigator) {
       wakeLock = await navigator.wakeLock.request("screen");
-      DOM.exerciseGetReady.innerText = JSON.stringify(wakeLock);
     } else if (noSleepVideo && noSleepVideo.paused) {
       try {
         await noSleepVideo.play();
