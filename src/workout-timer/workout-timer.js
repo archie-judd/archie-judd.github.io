@@ -1107,9 +1107,12 @@ const acquireScreenWakeLock = async () => {
     } else if (noSleepVideo && noSleepVideo.paused) {
       try {
         await noSleepVideo.play();
+        debugLog("NoSleep video playback started to prevent screen sleep");
       } catch (e) {
         console.warn("Failed to play NoSleep video:", e);
       }
+    } else {
+      debugLog("cannot acquire Wake Lock: unsupported");
     }
   } catch (err) {
     console.warn("Wake Lock ignored:", err);
