@@ -649,15 +649,8 @@ const expandLineToSteps = (line, lineIndex, section) => {
 
   if (modifier === "each side") {
     if (parsed.volume.unit === "reps") {
-      return [
-        {
-          type: "transition",
-          kind: "changeExercises",
-          durationSeconds: CHANGE_EXERCISE_TRANSITION_S,
-          section,
-        },
-        { type: "exercise", name, volume, side: "each", notes, section },
-      ];
+      // Rep-based exercises don't need transitions - announcement happens in the exercise step
+      return [{ type: "exercise", name, volume, side: "each", notes, section }];
     } else {
       return [
         {
@@ -678,6 +671,12 @@ const expandLineToSteps = (line, lineIndex, section) => {
     }
   }
 
+  // Rep-based exercises don't need transitions - announcement happens in the exercise step
+  if (parsed.volume.unit === "reps") {
+    return [{ type: "exercise", name, volume, side: null, notes, section }];
+  }
+
+  // Time-based exercises get a transition
   return [
     {
       type: "transition",
@@ -1311,12 +1310,16 @@ const buildStepSpeechParts = (step, state) => {
     if (step.volume.unit === "reps") {
       let sideSuffix = "";
       if (step.side === "each") {
-        sideSuffix = "on each side";
+        sideSuffix = " on each side";
       }
       return [
         {
-          text: `${step.volume.value} reps ${sideSuffix}`,
+          text: step.name,
           pauseBeforeMs: null,
+        },
+        {
+          text: `${step.volume.value} reps${sideSuffix}`,
+          pauseBeforeMs: 400,
         },
         { text: "Go!", pauseBeforeMs: 400 },
         { text: "Tap when done", pauseBeforeMs: 400 },
