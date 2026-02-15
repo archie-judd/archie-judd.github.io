@@ -187,12 +187,6 @@ const DOM = {
 
 // --- ERROR HANDLING ---
 
-/** @param {any} msg */
-function debugLog(msg) {
-  const el = document.getElementById("debug");
-  if (el) el.textContent += msg + "\n";
-}
-
 /** @param {string} message */
 const showError = (message) => {
   DOM.errorBanner.innerText = message;
@@ -1100,19 +1094,14 @@ const acquireScreenWakeLock = async () => {
     // Modern browsers with Wake Lock API
     if ("wakeLock" in navigator) {
       wakeLock = await navigator.wakeLock.request("screen");
-      debugLog("Wake Lock acquired");
-      debugLog(`type: ${wakeLock.type}`);
-      debugLog(`released: ${wakeLock.released}`);
       DOM.exerciseGetReady.innerText = JSON.stringify(wakeLock);
     } else if (noSleepVideo && noSleepVideo.paused) {
       try {
         await noSleepVideo.play();
-        debugLog("NoSleep video playback started to prevent screen sleep");
       } catch (e) {
         console.warn("Failed to play NoSleep video:", e);
       }
     } else {
-      debugLog("cannot acquire Wake Lock: unsupported");
     }
   } catch (err) {
     console.warn("Wake Lock ignored:", err);
@@ -1122,7 +1111,6 @@ const acquireScreenWakeLock = async () => {
 const releaseScreenWakeLock = () => {
   if (wakeLock) {
     wakeLock.release();
-    debugLog("Wake Lock released");
     wakeLock = null;
   }
   if (noSleepVideo && !noSleepVideo.paused) {

@@ -612,19 +612,4 @@ body {
     grid-template-areas: none;
     padding: 0;
   }
-
-  /* Slim down controls */
-  #debug {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-height: 30vh;
-    overflow: auto;
-    background: red;
-    color: white;
-    font-size: 14px;
-    z-index: 99999;
-    padding: 8px;
-  }
 }
