@@ -1091,16 +1091,31 @@ const updateDisplay = (state) => {
 
 const acquireScreenWakeLock = async () => {
   try {
+    // Modern browsers with Wake Lock API
     if ("wakeLock" in navigator) {
       wakeLock = await navigator.wakeLock.request("screen");
     }
+    // iOS fallback - use hidden video to prevent screen lock
+    if (noSleepVideo && noSleepVideo.paused) {
+      try {
+        await noSleepVideo.play();
+      } catch (e) {
+        console.warn("Failed to play NoSleep video:", e);
+      }
+    }
   } catch (err) {
-    console.warn("Wake Lock ignored");
+    console.warn("Wake Lock ignored:", err);
   }
 };
 
 const releaseScreenWakeLock = () => {
-  if (wakeLock) wakeLock.release();
+  if (wakeLock) {
+    wakeLock.release();
+    wakeLock = null;
+  }
+  if (noSleepVideo && !noSleepVideo.paused) {
+    noSleepVideo.pause();
+  }
 };
 
 document.addEventListener("visibilitychange", () => {
@@ -1125,7 +1140,7 @@ const startWorkout = async () => {
     );
   }
 
-  // acquireScreenWakeLock(); // Don't await - let it happen in background
+  acquireScreenWakeLock(); // Don't await - let it happen in background
   beginWorkoutFromStart(state);
 };
 
@@ -1482,11 +1497,27 @@ let voice;
 let wakeLock = null;
 let audioUnlocked = false;
 let isMuted = false;
+/** @type {HTMLVideoElement|null} */
+let noSleepVideo = null;
 
 loadVoice();
 if (window.speechSynthesis.onvoiceschanged !== undefined) {
   window.speechSynthesis.onvoiceschanged = loadVoice;
 }
+
+// Initialize NoSleep video for iOS
+const initNoSleepVideo = () => {
+  noSleepVideo = document.createElement("video");
+  noSleepVideo.setAttribute("playsinline", "");
+  noSleepVideo.setAttribute("muted", "");
+  noSleepVideo.style.display = "none";
+  // Minimal MP4 video (1x1 pixel, 1 frame)
+  noSleepVideo.src = "data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMQAAAAhmcmVlAAAAG21kYXQAAAGzABAHAAABthADAowdbb9/AAAC6W1vb3YAAABsbXZoZAAAAAB8JbCAfCWwgAAAA+gAAAAAAAEAAAEAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAIVdHJhawAAAFx0a2hkAAAAD3wlsIB8JbCAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAABAAAAAAAAACRlZHRzAAAAHGVsc3QAAAAAAAAAAQAAAAAAAAEAAAAAAAAAAAAAAQEAAAAAA0ltZGlhAAAAIG1kaGQAAAAAACWwgHwlsIBAAAAAAAAAAAAAAAAAgABAAAAAAAAtaGRscgAAAAAAAAAAc291bgAAAAAAAAAAAAAAAFNvdW5kSGFuZGxlcgAAAAM2bWluZgAAABBzbWhkAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAIac3RibAAAAGpzdHNkAAAAAAAAAAEAAABabXA0YQAAAAAAAAABAAAAAAAAAAAAAgAQAAAAAACAgAAAALJlc2RzAAAAAAOAgIAiAAIABICAgAEABAoSAAAAAAOAAAADIAAADwCAgIACBdBzcgADIFAGAgAAABhzdHRzAAAAAAAAAAEAAAABAAABAAAAABxzdHNjAAAAAAAAAAEAAAABAAAAAQAAAAEAAAAUc3RzegAAAAAAAAAGAAAAAQAAABRzdGNvAAAAAAAAAAEAAAAsAAAAYnVkdGEAAAAYbWV0YQAAAAAAAAAAIFB1cmVkSW5wdXQAIEFwcmlsIEpvaG4gTmFydmV5b24AEWhlRnTBo=";
+  noSleepVideo.loop = true;
+  document.body.appendChild(noSleepVideo);
+};
+
+initNoSleepVideo();
 
 // --- MULTI-WORKOUT MANAGEMENT ---
 
