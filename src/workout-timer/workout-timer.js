@@ -8,13 +8,12 @@ const STATUS = {
   DONE: "done",
 };
 
-const CHANGE_EXERCISE_TRANSITION_S = 10;
-const CHANGE_SIDES_TRANSITION_S = 7;
+const CHANGE_EXERCISE_TRANSITION_S = 4;
+const CHANGE_SIDES_TRANSITION_S = 3;
 const ERROR_BANNER_AUTO_HIDE_MS = 8000;
 const HALFWAY_ANNOUNCEMENT_MIN_DURATION_S = 20;
 const STEP_JUST_STARTED_THRESHOLD_S = 2;
 const TICK_INTERVAL_MS = 250;
-const STORAGE_KEY_WORKOUT = "workoutText";
 const STORAGE_KEY_WORKOUTS = "workoutTexts";
 
 const DEFAULT_WORKOUT = `# My Workout
@@ -37,7 +36,7 @@ Stretching | 2m`;
  * @property {"exercise"} type
  * @property {string} name
  * @property {Volume} volume
- * @property {"left" | "right" | null} side
+ * @property {"left" | "right" | "each" | null} side
  * @property {string | null} notes
  * @property {string | null} section
  */
@@ -363,15 +362,6 @@ const speak = async (text, pauseBeforeMs = null, cancelOn = null) => {
   return new Promise((resolve) => {
     if (!voice) console.warn("No voice available for speech synthesis.");
 
-    // iOS Safari fix: cancel existing speech and wait a tick
-    if (window.speechSynthesis.speaking) {
-      window.speechSynthesis.cancel();
-      // Give iOS Safari time to actually cancel
-      setTimeout(() => {
-        window.speechSynthesis.cancel();
-      }, 0);
-    }
-
     const utterance = new SpeechSynthesisUtterance(text);
     if (voice) utterance.voice = voice;
     const checkInterval = setInterval(() => {
@@ -413,6 +403,14 @@ const cancelSpeech = () => {
     // iOS Safari requires multiple cancel calls and a small delay
     window.speechSynthesis.cancel();
     setTimeout(() => window.speechSynthesis.cancel(), 0);
+  }
+};
+
+/** Cancel speech without a deferred cancel, for use when new speech will be
+ *  queued immediately after (avoids the deferred cancel killing the new speech). */
+const cancelSpeechForNewSpeech = () => {
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
   }
 };
 
@@ -650,22 +648,34 @@ const expandLineToSteps = (line, lineIndex, section) => {
   const { name, volume, modifier, notes } = parsed;
 
   if (modifier === "each side") {
-    return [
-      {
-        type: "transition",
-        kind: "changeExercises",
-        durationSeconds: CHANGE_EXERCISE_TRANSITION_S,
-        section,
-      },
-      { type: "exercise", name, volume, side: "left", notes, section },
-      {
-        type: "transition",
-        kind: "changeSides",
-        durationSeconds: CHANGE_SIDES_TRANSITION_S,
-        section,
-      },
-      { type: "exercise", name, volume, side: "right", notes, section },
-    ];
+    if (parsed.volume.unit === "reps") {
+      return [
+        {
+          type: "transition",
+          kind: "changeExercises",
+          durationSeconds: CHANGE_EXERCISE_TRANSITION_S,
+          section,
+        },
+        { type: "exercise", name, volume, side: "each", notes, section },
+      ];
+    } else {
+      return [
+        {
+          type: "transition",
+          kind: "changeExercises",
+          durationSeconds: CHANGE_EXERCISE_TRANSITION_S,
+          section,
+        },
+        { type: "exercise", name, volume, side: "left", notes, section },
+        {
+          type: "transition",
+          kind: "changeSides",
+          durationSeconds: CHANGE_SIDES_TRANSITION_S,
+          section,
+        },
+        { type: "exercise", name, volume, side: "right", notes, section },
+      ];
+    }
   }
 
   return [
@@ -728,7 +738,8 @@ const findNextExerciseOrRest = (state) => {
   return null;
 };
 
-/** @param {State} state */
+/** @param {State} state
+ * @return {Exercise | Transition | Rest | null} */
 const getCurrentStep = (state) => state.workoutData.steps[state.stepIndex];
 
 /**
@@ -843,38 +854,46 @@ const announceCountdownIfNeeded = async (state, timeLeft) => {
   const step = getCurrentStep(state);
 
   if (step.type === "transition") {
-    if (timeLeft <= 3 && timeLeft > 0) speak(timeLeft.toString());
-    return;
-  }
+    if (timeLeft <= 3 && timeLeft > 0) {
+      window.speechSynthesis.cancel();
+      speak(timeLeft.toString());
+      return;
+    }
+  } else {
+    const duration =
+      step.type === "rest"
+        ? step.durationSeconds
+        : step.volume.unit === "seconds"
+          ? step.volume.value
+          : null;
 
-  const duration =
-    step.type === "rest"
-      ? step.durationSeconds
-      : step.volume.unit === "seconds"
-        ? step.volume.value
-        : null;
+    if (duration !== null) {
+      const halfwayPoint = Math.floor(duration / 2);
+      if (
+        duration >= HALFWAY_ANNOUNCEMENT_MIN_DURATION_S &&
+        timeLeft === halfwayPoint
+      ) {
+        speakSequence(
+          [
+            { text: "Halfway there", pauseBeforeMs: null },
+            {
+              text: `${formatDurationForSpeech(halfwayPoint)} left`,
+              pauseBeforeMs: 400,
+            },
+          ],
+          () => state.status !== STATUS.IN_PROGRESS,
+        );
+      }
+    }
 
-  if (duration !== null) {
-    const halfwayPoint = Math.floor(duration / 2);
-    if (
-      duration >= HALFWAY_ANNOUNCEMENT_MIN_DURATION_S &&
-      timeLeft === halfwayPoint
-    ) {
-      speakSequence(
-        [
-          { text: "Halfway there", pauseBeforeMs: null },
-          {
-            text: `${formatDurationForSpeech(halfwayPoint)} left`,
-            pauseBeforeMs: 400,
-          },
-        ],
+    if (timeLeft <= 3 && timeLeft > 0) {
+      window.speechSynthesis.cancel();
+      speak(
+        timeLeft.toString(),
+        null,
         () => state.status !== STATUS.IN_PROGRESS,
       );
     }
-  }
-
-  if (timeLeft <= 3 && timeLeft > 0) {
-    speak(timeLeft.toString(), null, () => state.status !== STATUS.IN_PROGRESS);
   }
 };
 
@@ -965,9 +984,9 @@ const displayTransitionStep = (state, step) => {
   DOM.displayContainer.className = "main-display state-transition";
   DOM.exerciseGetReady.innerText =
     step.kind === "changeSides" ? "Switch sides" : "Get Ready";
-  DOM.nextIndicator.innerText = "";
+  DOM.nextIndicator.innerText = "Tap to skip";
   DOM.timerDisplay.innerText = formatCountdown(getStepTimeLeftS(state));
-  DOM.displayContainer.dataset.tappable = "false";
+  DOM.displayContainer.dataset.tappable = "true";
   DOM.playPauseBtn.innerText = "Pause";
 
   const next = findNextExerciseOrRest(state);
@@ -1085,6 +1104,15 @@ const releaseScreenWakeLock = () => {
   if (wakeLock) wakeLock.release();
 };
 
+document.addEventListener("visibilitychange", () => {
+  if (
+    document.visibilityState === "visible" &&
+    state.status === STATUS.IN_PROGRESS
+  ) {
+    acquireScreenWakeLock();
+  }
+});
+
 // --- WORKFLOW CONTROL ---
 
 const startWorkout = async () => {
@@ -1098,7 +1126,7 @@ const startWorkout = async () => {
     );
   }
 
-  await acquireScreenWakeLock();
+  // acquireScreenWakeLock(); // Don't await - let it happen in background
   beginWorkoutFromStart(state);
 };
 
@@ -1147,7 +1175,7 @@ const finishWorkout = (state) => {
  * Announce the current step with speech (without resetting step state)
  * @param {State} state
  */
-const announceCurrentStep = (state) => {
+const announceCurrentStep = async (state) => {
   const entryTimestamp = state.stepEntryTime;
   const step = getCurrentStep(state);
   const cancelOn = () =>
@@ -1158,17 +1186,55 @@ const announceCurrentStep = (state) => {
     state.stepIndex === 0 && state.workoutData.title
       ? [{ text: state.workoutData.title, pauseBeforeMs: null }]
       : [];
+
+  // Check if section changed from previous step
+  const prevStep =
+    state.stepIndex > 0 ? state.workoutData.steps[state.stepIndex - 1] : null;
+  const sectionChanged = !prevStep || prevStep.section !== step.section;
+  const sectionParts =
+    sectionChanged && step.section
+      ? [
+          {
+            text: step.section,
+            pauseBeforeMs: titleParts.length > 0 ? 400 : null,
+          },
+        ]
+      : [];
+
   const speechParts = buildStepSpeechParts(step, state);
   const noteParts =
     (step.type === "exercise" || step.type === "rest") && step.notes
       ? [{ text: step.notes, pauseBeforeMs: 500 }]
       : [];
 
-  console.log("Announcing step:", { titleParts, speechParts, noteParts });
-  speakSequence([...titleParts, ...speechParts, ...noteParts], cancelOn);
+  // For transitions, speak the announcement first (blocking), then start countdown timer
+  if (step.type === "transition") {
+    await speakSequence(
+      [...titleParts, ...sectionParts, ...speechParts, ...noteParts],
+      cancelOn,
+    );
+
+    // After speech completes, start the countdown timer
+    if (
+      isStillOnStep(state, entryTimestamp) &&
+      state.status === STATUS.IN_PROGRESS
+    ) {
+      state.stepResumedAt = Date.now();
+      state.stepElapsedMs = 0;
+      state.lastAnnouncedSecond = -1;
+      if (!state.mainTimer) startTickTimer(state);
+    }
+  } else {
+    // For exercises and rest, start timer immediately and speak in parallel
+    state.stepResumedAt = Date.now();
+    speakSequence(
+      [...titleParts, ...sectionParts, ...speechParts, ...noteParts],
+      cancelOn,
+    );
+    if (!state.mainTimer) startTickTimer(state);
+  }
 
   state.stepAnnounced = true;
-  if (!state.mainTimer) startTickTimer(state);
 };
 
 /**
@@ -1185,14 +1251,21 @@ const enterCurrentStep = (state) => {
     return;
   }
 
-  cancelSpeech();
   state.stepEntryTime = Date.now();
   const step = getCurrentStep(state);
   state.stepElapsedMs = 0;
   state.stepAnnounced = false;
   state.lastAnnouncedSecond = -1;
   state.stepDuration = getStepDuration(step);
-  state.stepResumedAt = Date.now();
+
+  // For transitions, don't start timer yet - announceCurrentStep will start it after speech
+  // For exercises/rest, start timer immediately
+  if (step.type === "transition") {
+    state.stepResumedAt = 0;
+  } else {
+    state.stepResumedAt = Date.now();
+  }
+
   updateDisplay(state);
 
   if (state.status === STATUS.IN_PROGRESS) {
@@ -1219,12 +1292,14 @@ const buildStepSpeechParts = (step, state) => {
   if (step.type === "transition") {
     const next = findNextExerciseOrRest(state);
     if (next?.type === "exercise") {
-      const sideSuffix =
-        step.kind === "changeSides"
-          ? `the ${next.side} side`
-          : next.side !== null
-            ? `${next.name} on the ${next.side} side`
-            : next.name;
+      let sideSuffix;
+      if (step.kind === "changeSides") {
+        sideSuffix = `the ${next.side} side`;
+      } else if (next.side === "left" || next.side === "right") {
+        sideSuffix = `${next.name} on the ${next.side} side`;
+      } else {
+        sideSuffix = next.name;
+      }
       const prefix =
         step.kind === "changeSides" ? "Switch to" : "Get ready for";
       return [{ text: `${prefix} ${sideSuffix}`, pauseBeforeMs: null }];
@@ -1234,8 +1309,15 @@ const buildStepSpeechParts = (step, state) => {
 
   if (step.type === "exercise") {
     if (step.volume.unit === "reps") {
+      let sideSuffix = "";
+      if (step.side === "each") {
+        sideSuffix = "on each side";
+      }
       return [
-        { text: `${step.volume.value} reps`, pauseBeforeMs: null },
+        {
+          text: `${step.volume.value} reps ${sideSuffix}`,
+          pauseBeforeMs: null,
+        },
         { text: "Go!", pauseBeforeMs: 400 },
         { text: "Tap when done", pauseBeforeMs: 400 },
       ];
@@ -1261,6 +1343,7 @@ const buildStepSpeechParts = (step, state) => {
 
 /** @param {State} state */
 const advanceToNextStep = (state) => {
+  cancelSpeechForNewSpeech();
   state.stepIndex++;
   if (state.stepIndex >= state.workoutData.steps.length) {
     finishWorkout(state);
@@ -1335,7 +1418,7 @@ const togglePause = (state) => {
 
 /** @param {State} state */
 const skipToNextExercise = (state) => {
-  cancelSpeech();
+  cancelSpeechForNewSpeech();
   const nextIndex = findNextBreakpointIndex(state);
   if (nextIndex >= state.workoutData.steps.length) {
     finishWorkout(state);
@@ -1359,7 +1442,7 @@ const skipToNextExercise = (state) => {
 
 /** @param {State} state */
 const skipToPrevExercise = (state) => {
-  cancelSpeech();
+  cancelSpeechForNewSpeech();
   const elapsedSinceEntry = Math.floor(
     (Date.now() - state.stepEntryTime) / 1000,
   );
@@ -1419,19 +1502,14 @@ function loadWorkoutStore() {
       }
     } catch (_) {}
   }
-  const legacy = localStorage.getItem(STORAGE_KEY_WORKOUT);
   return {
-    workouts: [legacy ?? DEFAULT_WORKOUT],
+    workouts: [DEFAULT_WORKOUT],
     currentIndex: 0,
   };
 }
 
 function persistWorkoutStore() {
   localStorage.setItem(STORAGE_KEY_WORKOUTS, JSON.stringify(workoutStore));
-  localStorage.setItem(
-    STORAGE_KEY_WORKOUT,
-    workoutStore.workouts[workoutStore.currentIndex],
-  );
 }
 
 function saveCurrentWorkoutText() {
@@ -1552,6 +1630,12 @@ DOM.nextBtn.addEventListener("click", () => {
 DOM.displayContainer.addEventListener("click", () => {
   try {
     if (DOM.displayContainer.dataset.tappable === "true") {
+      console.log("Display tapped to skip transition/rest");
+      const step = getCurrentStep(state);
+      // For transitions, cancel speech before advancing
+      if (step?.type === "transition") {
+        cancelSpeechForNewSpeech();
+      }
       advanceToNextStep(state);
     }
   } catch (e) {
