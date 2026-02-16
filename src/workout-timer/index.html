@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Bungee&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/workout-timer/workout-timer.css" />
@@ -52,7 +52,7 @@ Stretching | 3m"
           ></textarea>
         </div>
       </div>
-      <div class="editor-progress-bar-container"></div>
+
       <div class="controls">
         <button id="editor-prev-btn" class="control-btn">&lt;-</button>
         <button id="start-btn" class="control-btn">START</button>
@@ -87,21 +87,5 @@ Stretching | 3m"
         <button id="next-btn" class="control-btn">-&gt;</button>
       </div>
     </div>
-
-    <script>
-      const timerDisplay = document.getElementById("timer-display");
-      if (timerDisplay) {
-        new MutationObserver(() => {
-          timerDisplay.setAttribute(
-            "data-length",
-            String(timerDisplay.textContent.trim().length),
-          );
-        }).observe(timerDisplay, {
-          childList: true,
-          characterData: true,
-          subtree: true,
-        });
-      }
-    </script>
   </body>
 </html>

@@ -298,7 +298,6 @@ function updateHighlightOverlay() {
 
 function syncOverlayScroll() {
   DOM.overlay.scrollTop = DOM.inputText.scrollTop;
-  DOM.overlay.scrollLeft = DOM.inputText.scrollLeft;
 }
 
 DOM.inputText.addEventListener("scroll", syncOverlayScroll);
@@ -314,10 +313,9 @@ const ensureSpeechUnlocked = () => {
   if (!window.speechSynthesis) {
     throw new Error("Speech Synthesis API not supported in this browser.");
   }
-  if (!window.speechSynthesis.speaking && !audioUnlocked) {
+  if (!window.speechSynthesis.speaking) {
     const utterance = new SpeechSynthesisUtterance(" ");
     window.speechSynthesis.speak(utterance);
-    audioUnlocked = true;
   }
 };
 
@@ -759,8 +757,7 @@ const getStepDuration = (step) => {
   if (step.type === "transition") return step.durationSeconds;
   if (step.type === "exercise")
     return step.volume.unit === "seconds" ? step.volume.value : 0;
-  if (step.type === "rest") return step.durationSeconds;
-  return 0;
+  return step.durationSeconds;
 };
 
 // --- DERIVED TIME HELPERS ---
@@ -905,6 +902,14 @@ const announceCountdownIfNeeded = async (state, timeLeft) => {
   }
 };
 
+// --- DISPLAY HELPERS ---
+
+/** @param {string} text */
+const setTimerDisplay = (text) => {
+  DOM.timerDisplay.innerText = text;
+  DOM.timerDisplay.dataset.length = String(text.length);
+};
+
 // --- DISPLAY UPDATES ---
 
 /** @param {State} state */
@@ -980,7 +985,7 @@ const displayTransitionStep = (state, step) => {
   DOM.exerciseGetReady.innerText =
     step.kind === "changeSides" ? "Switch sides" : "Get Ready";
   DOM.tapIndicator.innerText = "Tap to skip";
-  DOM.timerDisplay.innerText = formatCountdown(getStepTimeLeftS(state));
+  setTimerDisplay(formatCountdown(getStepTimeLeftS(state)));
   DOM.displayContainer.dataset.tappable = "true";
   DOM.playPauseBtn.innerText = "Pause";
 
@@ -1007,7 +1012,7 @@ const displayActiveStep = (state, step) => {
   if (step.type === "rest") {
     DOM.exerciseName.innerText = "Rest";
     DOM.exerciseDetail.innerText = "";
-    DOM.timerDisplay.innerText = formatCountdown(getStepTimeLeftS(state));
+    setTimerDisplay(formatCountdown(getStepTimeLeftS(state)));
     DOM.displayContainer.dataset.tappable = "true";
     DOM.tapIndicator.innerText = "Tap to skip";
   } else {
@@ -1016,11 +1021,11 @@ const displayActiveStep = (state, step) => {
       step.side !== null ? `(${step.side} side)` : "";
 
     if (step.volume.unit === "reps") {
-      DOM.timerDisplay.innerText = step.volume.value.toString();
+      setTimerDisplay(step.volume.value.toString());
       DOM.displayContainer.dataset.tappable = "true";
       DOM.tapIndicator.innerText = "Tap to continue";
     } else {
-      DOM.timerDisplay.innerText = formatCountdown(getStepTimeLeftS(state));
+      setTimerDisplay(formatCountdown(getStepTimeLeftS(state)));
       DOM.tapIndicator.innerText = "";
     }
   }
@@ -1035,7 +1040,7 @@ const displayDone = (state) => {
   DOM.exerciseDetail.innerText = "";
   DOM.tapIndicator.innerText = "";
   DOM.timerDisplay.style.display = "block";
-  DOM.timerDisplay.innerText = "00";
+  setTimerDisplay("00");
   DOM.progressBar.style.width = "100%";
   DOM.progressBarContainer.style.display = "none";
   DOM.playPauseBtn.disabled = false;
@@ -1505,9 +1510,7 @@ let state = createInitialState();
 /** @type {SpeechSynthesisVoice|undefined} */
 let voice;
 let wakeLock = null;
-let audioUnlocked = false;
 let isMuted = false;
-/** @type {HTMLVideoElement|null} */
 
 loadVoice();
 if (window.speechSynthesis.onvoiceschanged !== undefined) {
