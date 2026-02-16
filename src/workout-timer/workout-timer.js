@@ -154,7 +154,7 @@ const DOM = {
   exerciseName: document.getElementById("exercise-name"),
   exerciseDetail: document.getElementById("exercise-detail"),
   timerDisplay: document.getElementById("timer-display"),
-  tapIndicator: document.getElementById("next-indicator"),
+  tapIndicator: document.getElementById("tap-indicator"),
   playPauseBtn: /** @type {HTMLButtonElement} */ (
     document.getElementById("play-pause-btn")
   ),
@@ -999,6 +999,7 @@ const displayActiveStep = (state, step) => {
     DOM.exerciseName.innerText = "Rest";
     DOM.exerciseDetail.innerText = "";
     DOM.timerDisplay.innerText = formatCountdown(getStepTimeLeftS(state));
+    DOM.displayContainer.dataset.tappable = "true";
     DOM.tapIndicator.innerText = "Tap to skip";
   } else {
     DOM.exerciseName.innerText = step.name;
