@@ -154,7 +154,7 @@ const DOM = {
   exerciseName: document.getElementById("exercise-name"),
   exerciseDetail: document.getElementById("exercise-detail"),
   timerDisplay: document.getElementById("timer-display"),
-  nextIndicator: document.getElementById("next-indicator"),
+  tapIndicator: document.getElementById("next-indicator"),
   playPauseBtn: /** @type {HTMLButtonElement} */ (
     document.getElementById("play-pause-btn")
   ),
@@ -920,19 +920,6 @@ const displayEditing = () => {
 };
 
 /** @param {State} state */
-const formatNextStepLabel = (state) => {
-  const next = findNextExerciseOrRest(state);
-  if (!next) return "Next: Finish";
-  if (next.type === "rest") return "Next: Rest";
-  if (next.type === "exercise") {
-    return next.side
-      ? `Next: ${next.name} (${next.side} side)`
-      : `Next: ${next.name}`;
-  }
-  return "";
-};
-
-/** @param {State} state */
 const updateSectionDisplay = (state) => {
   if (!DOM.sectionIndicator) return;
   const step = getCurrentStep(state);
@@ -983,7 +970,7 @@ const displayTransitionStep = (state, step) => {
   DOM.displayContainer.className = "main-display state-transition";
   DOM.exerciseGetReady.innerText =
     step.kind === "changeSides" ? "Switch sides" : "Get Ready";
-  DOM.nextIndicator.innerText = "Tap to skip";
+  DOM.tapIndicator.innerText = "Tap to skip";
   DOM.timerDisplay.innerText = formatCountdown(getStepTimeLeftS(state));
   DOM.displayContainer.dataset.tappable = "true";
   DOM.playPauseBtn.innerText = "Pause";
@@ -1006,13 +993,13 @@ const displayTransitionStep = (state, step) => {
 const displayActiveStep = (state, step) => {
   DOM.displayContainer.className = "main-display state-work";
   DOM.exerciseGetReady.innerText = "";
-  DOM.nextIndicator.innerText = formatNextStepLabel(state);
   DOM.displayContainer.dataset.tappable = "false";
 
   if (step.type === "rest") {
     DOM.exerciseName.innerText = "Rest";
     DOM.exerciseDetail.innerText = "";
     DOM.timerDisplay.innerText = formatCountdown(getStepTimeLeftS(state));
+    DOM.tapIndicator.innerText = "Tap to skip";
   } else {
     DOM.exerciseName.innerText = step.name;
     DOM.exerciseDetail.innerText =
@@ -1021,8 +1008,10 @@ const displayActiveStep = (state, step) => {
     if (step.volume.unit === "reps") {
       DOM.timerDisplay.innerText = step.volume.value.toString();
       DOM.displayContainer.dataset.tappable = "true";
+      DOM.tapIndicator.innerText = "Tap to continue";
     } else {
       DOM.timerDisplay.innerText = formatCountdown(getStepTimeLeftS(state));
+      DOM.tapIndicator.innerText = "";
     }
   }
 };
@@ -1034,7 +1023,7 @@ const displayDone = (state) => {
   DOM.exerciseGetReady.innerText = "";
   DOM.exerciseName.innerText = "Workout Complete!";
   DOM.exerciseDetail.innerText = "";
-  DOM.nextIndicator.innerText = "";
+  DOM.tapIndicator.innerText = "";
   DOM.timerDisplay.style.display = "block";
   DOM.timerDisplay.innerText = "00";
   DOM.progressBar.style.width = "100%";
@@ -1336,7 +1325,6 @@ const buildStepSpeechParts = (step, state) => {
           pauseBeforeMs: 400,
         },
         { text: "Go!", pauseBeforeMs: 400 },
-        { text: "Tap when done", pauseBeforeMs: 400 },
       ];
     }
     return [
