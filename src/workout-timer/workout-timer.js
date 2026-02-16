@@ -335,8 +335,17 @@ const loadVoice = () => {
   const voices = window.speechSynthesis.getVoices();
   if (voices.length > 0) {
     voice =
+      voices.find(
+        (v) => v.voiceURI?.includes("premium") && v.lang.startsWith("en"),
+      ) ||
+      voices.find(
+        (v) => v.voiceURI?.includes("enhanced") && v.lang.startsWith("en"),
+      ) ||
       voices.find((v) => v.name === "Samantha") ||
       voices.find((v) => v.name === "Google US English") ||
+      voices.find(
+        (v) => v.voiceURI?.includes("compact") && v.lang.startsWith("en"),
+      ) ||
       voices.find((v) => v.lang === "en-US") ||
       voices.find((v) => v.lang.startsWith("en")) ||
       voices[0];
@@ -1084,13 +1093,6 @@ const acquireScreenWakeLock = async () => {
     // Modern browsers with Wake Lock API
     if ("wakeLock" in navigator) {
       wakeLock = await navigator.wakeLock.request("screen");
-    } else if (noSleepVideo && noSleepVideo.paused) {
-      try {
-        await noSleepVideo.play();
-      } catch (e) {
-        console.warn("Failed to play NoSleep video:", e);
-      }
-    } else {
     }
   } catch (err) {
     console.warn("Wake Lock ignored:", err);
@@ -1101,9 +1103,6 @@ const releaseScreenWakeLock = () => {
   if (wakeLock) {
     wakeLock.release();
     wakeLock = null;
-  }
-  if (noSleepVideo && !noSleepVideo.paused) {
-    noSleepVideo.pause();
   }
 };
 
@@ -1509,27 +1508,11 @@ let wakeLock = null;
 let audioUnlocked = false;
 let isMuted = false;
 /** @type {HTMLVideoElement|null} */
-let noSleepVideo = null;
 
 loadVoice();
 if (window.speechSynthesis.onvoiceschanged !== undefined) {
   window.speechSynthesis.onvoiceschanged = loadVoice;
 }
-
-// Initialize NoSleep video for iOS
-const initNoSleepVideo = () => {
-  noSleepVideo = document.createElement("video");
-  noSleepVideo.setAttribute("playsinline", "");
-  noSleepVideo.setAttribute("muted", "");
-  noSleepVideo.style.display = "none";
-  // Minimal MP4 video (1x1 pixel, 1 frame)
-  noSleepVideo.src =
-    "data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMQAAAAhmcmVlAAAAG21kYXQAAAGzABAHAAABthADAowdbb9/AAAC6W1vb3YAAABsbXZoZAAAAAB8JbCAfCWwgAAAA+gAAAAAAAEAAAEAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAIVdHJhawAAAFx0a2hkAAAAD3wlsIB8JbCAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAABAAAAAAAAACRlZHRzAAAAHGVsc3QAAAAAAAAAAQAAAAAAAAEAAAAAAAAAAAAAAQEAAAAAA0ltZGlhAAAAIG1kaGQAAAAAACWwgHwlsIBAAAAAAAAAAAAAAAAAgABAAAAAAAAtaGRscgAAAAAAAAAAc291bgAAAAAAAAAAAAAAAFNvdW5kSGFuZGxlcgAAAAM2bWluZgAAABBzbWhkAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAIac3RibAAAAGpzdHNkAAAAAAAAAAEAAABabXA0YQAAAAAAAAABAAAAAAAAAAAAAgAQAAAAAACAgAAAALJlc2RzAAAAAAOAgIAiAAIABICAgAEABAoSAAAAAAOAAAADIAAADwCAgIACBdBzcgADIFAGAgAAABhzdHRzAAAAAAAAAAEAAAABAAABAAAAABxzdHNjAAAAAAAAAAEAAAABAAAAAQAAAAEAAAAUc3RzegAAAAAAAAAGAAAAAQAAABRzdGNvAAAAAAAAAAEAAAAsAAAAYnVkdGEAAAAYbWV0YQAAAAAAAAAAIFB1cmVkSW5wdXQAIEFwcmlsIEpvaG4gTmFydmV5b24AEWhlRnTBo=";
-  noSleepVideo.loop = true;
-  document.body.appendChild(noSleepVideo);
-};
-
-initNoSleepVideo();
 
 // --- MULTI-WORKOUT MANAGEMENT ---
 
