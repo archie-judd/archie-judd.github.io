@@ -1185,37 +1185,11 @@ const announceCurrentStep = async (state) => {
     !isStillOnStep(state, entryTimestamp) ||
     state.status !== STATUS.IN_PROGRESS;
 
-  const titleParts =
-    state.stepIndex === 0 && state.workoutData.title
-      ? [{ text: state.workoutData.title, pauseBeforeMs: null }]
-      : [];
-
-  // Check if section changed from previous step
-  const prevStep =
-    state.stepIndex > 0 ? state.workoutData.steps[state.stepIndex - 1] : null;
-  const sectionChanged = !prevStep || prevStep.section !== step.section;
-  const sectionParts =
-    sectionChanged && step.section
-      ? [
-          {
-            text: step.section,
-            pauseBeforeMs: titleParts.length > 0 ? 400 : null,
-          },
-        ]
-      : [];
-
-  const speechParts = buildStepSpeechParts(step, state);
-  const noteParts =
-    (step.type === "exercise" || step.type === "rest") && step.notes
-      ? [{ text: step.notes, pauseBeforeMs: 500 }]
-      : [];
+  const allParts = buildStepSpeechParts(step, state);
 
   // For transitions, speak the announcement first (blocking), then start countdown timer
   if (step.type === "transition") {
-    await speakSequence(
-      [...titleParts, ...sectionParts, ...speechParts, ...noteParts],
-      cancelOn,
-    );
+    await speakSequence(allParts, cancelOn);
 
     // After speech completes, start the countdown timer
     if (
@@ -1230,10 +1204,7 @@ const announceCurrentStep = async (state) => {
   } else {
     // For exercises and rest, start timer immediately and speak in parallel
     state.stepResumedAt = Date.now();
-    speakSequence(
-      [...titleParts, ...sectionParts, ...speechParts, ...noteParts],
-      cancelOn,
-    );
+    speakSequence(allParts, cancelOn);
     if (!state.mainTimer) startTickTimer(state);
   }
 
@@ -1286,65 +1257,117 @@ const isStillOnStep = (state, entryTimestamp) =>
   state.status !== STATUS.EDITING;
 
 /**
- * Build an array of speech instructions for a step.
+ * Build speech parts for a transition step.
+ * @param {Transition} step
+ * @param {State} state
+ * @returns {Array<{ text: string, pauseBeforeMs: number | null }>}
+ */
+const buildTransitionSpeechParts = (step, state) => {
+  const next = findNextExerciseOrRest(state);
+  if (next?.type === "exercise") {
+    let sideSuffix;
+    if (step.kind === "changeSides") {
+      sideSuffix = `the ${next.side} side`;
+    } else if (next.side === "left" || next.side === "right") {
+      sideSuffix = `${next.name} on the ${next.side} side`;
+    } else {
+      sideSuffix = next.name;
+    }
+    const prefix = step.kind === "changeSides" ? "Switch to" : "Get ready for";
+    return [{ text: `${prefix} ${sideSuffix}`, pauseBeforeMs: null }];
+  }
+  return [];
+};
+
+/**
+ * Build speech parts for an exercise step.
+ * @param {Exercise} step
+ * @returns {Array<{ text: string, pauseBeforeMs: number | null }>}
+ */
+const buildExerciseSpeechParts = (step) => {
+  if (step.volume.unit === "reps") {
+    const sideSuffix = step.side === "each" ? " on each side" : "";
+    return [
+      { text: step.name, pauseBeforeMs: null },
+      { text: `${step.volume.value} reps${sideSuffix}`, pauseBeforeMs: 400 },
+      { text: "Go!", pauseBeforeMs: 400 },
+    ];
+  }
+  return [
+    { text: formatDurationForSpeech(step.volume.value), pauseBeforeMs: null },
+    { text: "Go!", pauseBeforeMs: 400 },
+  ];
+};
+
+/**
+ * Build speech parts for a rest step.
+ * @param {Rest} step
+ * @returns {Array<{ text: string, pauseBeforeMs: number | null }>}
+ */
+const buildRestSpeechParts = (step) => [
+  { text: "Rest for", pauseBeforeMs: null },
+  {
+    text: formatDurationForSpeech(step.durationSeconds),
+    pauseBeforeMs: 400,
+  },
+];
+
+/**
+ * Build the complete array of speech parts for a step, including title,
+ * section, step-specific speech, and notes. Every part that follows
+ * another part has a 400ms pause before it (except section after title,
+ * which has a 1s pause).
  * @param {Exercise | Transition | Rest} step
  * @param {State} state
  * @returns {Array<{ text: string, pauseBeforeMs: number | null }>}
  */
 const buildStepSpeechParts = (step, state) => {
+  /** @type {Array<{ text: string, pauseBeforeMs: number | null }>} */
+  const parts = [];
+
+  // --- Title (first step only) ---
+  const hasTitle = state.stepIndex === 0 && state.workoutData.title;
+  if (hasTitle) {
+    parts.push({ text: state.workoutData.title, pauseBeforeMs: null });
+  }
+
+  // --- Section (when it changes from the previous step) ---
+  const prevStep =
+    state.stepIndex > 0 ? state.workoutData.steps[state.stepIndex - 1] : null;
+  const sectionChanged = !prevStep || prevStep.section !== step.section;
+  if (sectionChanged && step.section) {
+    parts.push({
+      text: `Starting ${step.section}`,
+      pauseBeforeMs: hasTitle ? 1000 : null,
+    });
+  }
+
+  // --- Step-specific speech ---
+  /** @type {Array<{ text: string, pauseBeforeMs: number | null }>} */
+  let stepParts;
   if (step.type === "transition") {
-    const next = findNextExerciseOrRest(state);
-    if (next?.type === "exercise") {
-      let sideSuffix;
-      if (step.kind === "changeSides") {
-        sideSuffix = `the ${next.side} side`;
-      } else if (next.side === "left" || next.side === "right") {
-        sideSuffix = `${next.name} on the ${next.side} side`;
-      } else {
-        sideSuffix = next.name;
-      }
-      const prefix =
-        step.kind === "changeSides" ? "Switch to" : "Get ready for";
-      return [{ text: `${prefix} ${sideSuffix}`, pauseBeforeMs: null }];
+    stepParts = buildTransitionSpeechParts(step, state);
+  } else if (step.type === "exercise") {
+    stepParts = buildExerciseSpeechParts(step);
+  } else {
+    stepParts = buildRestSpeechParts(step);
+  }
+
+  // Merge step parts: first step part gets 400ms pause if preceded by earlier parts
+  for (let i = 0; i < stepParts.length; i++) {
+    if (i === 0 && parts.length > 0) {
+      parts.push({ text: stepParts[i].text, pauseBeforeMs: 400 });
+    } else {
+      parts.push(stepParts[i]);
     }
-    return [];
   }
 
-  if (step.type === "exercise") {
-    if (step.volume.unit === "reps") {
-      let sideSuffix = "";
-      if (step.side === "each") {
-        sideSuffix = " on each side";
-      }
-      return [
-        {
-          text: step.name,
-          pauseBeforeMs: null,
-        },
-        {
-          text: `${step.volume.value} reps${sideSuffix}`,
-          pauseBeforeMs: 400,
-        },
-        { text: "Go!", pauseBeforeMs: 400 },
-      ];
-    }
-    return [
-      { text: formatDurationForSpeech(step.volume.value), pauseBeforeMs: 300 },
-      { text: "Go!", pauseBeforeMs: 400 },
-    ];
+  // --- Notes ---
+  if ((step.type === "exercise" || step.type === "rest") && step.notes) {
+    parts.push({ text: step.notes, pauseBeforeMs: 400 });
   }
 
-  if (step.type === "rest") {
-    return [
-      { text: "Rest for", pauseBeforeMs: null },
-      {
-        text: formatDurationForSpeech(step.durationSeconds),
-        pauseBeforeMs: 400,
-      },
-    ];
-  }
-
-  return [];
+  return parts;
 };
 
 /** @param {State} state */
