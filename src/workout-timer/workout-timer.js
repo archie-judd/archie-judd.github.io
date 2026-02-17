@@ -15,6 +15,7 @@ const HALFWAY_ANNOUNCEMENT_MIN_DURATION_S = 20;
 const STEP_JUST_STARTED_THRESHOLD_S = 2;
 const TICK_INTERVAL_MS = 250;
 const STORAGE_KEY_WORKOUTS = "workoutTexts";
+const IS_TOUCH_DEVICE = window.matchMedia("(pointer: coarse)").matches;
 
 const DEFAULT_WORKOUT = `# My Workout
 ## Warm Up
@@ -984,7 +985,9 @@ const displayTransitionStep = (state, step) => {
   DOM.displayContainer.className = "main-display state-transition";
   DOM.exerciseGetReady.innerText =
     step.kind === "changeSides" ? "Switch sides" : "Get Ready";
-  DOM.tapIndicator.innerText = "Tap to skip";
+  DOM.tapIndicator.innerText = IS_TOUCH_DEVICE
+    ? "Tap to skip"
+    : "Press Enter to skip";
   setTimerDisplay(formatCountdown(getStepTimeLeftS(state)));
   DOM.displayContainer.dataset.tappable = "true";
   DOM.playPauseBtn.innerText = "Pause";
@@ -1014,7 +1017,9 @@ const displayActiveStep = (state, step) => {
     DOM.exerciseDetail.innerText = "";
     setTimerDisplay(formatCountdown(getStepTimeLeftS(state)));
     DOM.displayContainer.dataset.tappable = "true";
-    DOM.tapIndicator.innerText = "Tap to skip";
+    DOM.tapIndicator.innerText = IS_TOUCH_DEVICE
+      ? "Tap to skip"
+      : "Press Enter to skip";
   } else {
     DOM.exerciseName.innerText = step.name;
     DOM.exerciseDetail.innerText =
@@ -1023,7 +1028,9 @@ const displayActiveStep = (state, step) => {
     if (step.volume.unit === "reps") {
       setTimerDisplay(step.volume.value.toString());
       DOM.displayContainer.dataset.tappable = "true";
-      DOM.tapIndicator.innerText = "Tap to continue";
+      DOM.tapIndicator.innerText = IS_TOUCH_DEVICE
+        ? "Tap to continue"
+        : "Press Enter to continue";
     } else {
       setTimerDisplay(formatCountdown(getStepTimeLeftS(state)));
       DOM.tapIndicator.innerText = "";
@@ -1666,12 +1673,6 @@ DOM.nextBtn.addEventListener("click", () => {
 DOM.displayContainer.addEventListener("click", () => {
   try {
     if (DOM.displayContainer.dataset.tappable === "true") {
-      console.log("Display tapped to skip transition/rest");
-      const step = getCurrentStep(state);
-      // For transitions, cancel speech before advancing
-      if (step?.type === "transition") {
-        cancelSpeechForNewSpeech();
-      }
       advanceToNextStep(state);
     }
   } catch (e) {
@@ -1690,7 +1691,7 @@ document.addEventListener("keydown", (e) => {
         DOM.displayContainer.dataset.tappable === "true"
       ) {
         e.preventDefault();
-        skipToNextExercise(state);
+        advanceToNextStep(state);
       } else if (e.code === "Escape") {
         e.preventDefault();
         transitionToEditing(state);
