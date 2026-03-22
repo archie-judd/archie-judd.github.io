@@ -1433,7 +1433,6 @@ const togglePause = (state) => {
   }
 
   if (state.status === STATUS.PAUSED) {
-    isMuted = false;
     const pauseDuration = Date.now() - state.pauseStartTime;
     state.totalPausedMs += pauseDuration;
     state.pauseStartTime = 0;
