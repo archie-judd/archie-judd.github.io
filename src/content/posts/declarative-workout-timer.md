@@ -6,7 +6,7 @@ Part of the reason for my predicament was that I suffered pretty badly with shin
 
 I went for it, but found it really frustrating having to pick my phone up all the time to remember what I was supposed to be doing, and how long to set my timer. I just wanted an analogue experience - someone to tell me what to do. _There is surely an app for this_ I thought. An app where I can just enter in some steps, and some rest periods, tap "GO", and it will shout at me. I **still** think _there is surely an app for this_, but I couldn't find one.
 
-So, I put my fitness regimen on hold for another week and decided to make one. This is it:
+So, I put my fitness regimen on hold for another week and decided to make one:
 
 <figure style="display: flex; flex-direction: column; align-items: center; margin: 30px 0;">
   <iframe
@@ -18,8 +18,8 @@ So, I put my fitness regimen on hold for another week and decided to make one. T
   <figcaption><a href="/workout-timer/" target="_blank">Open in a new tab</a></figcaption>
 </figure>
 
-You declare what you want to do in plain text. Write _jumping jacks | 30s_ to do 30 seconds of jumping jacks, or _jumping jacks | 30_ to do 30 of them. It's a sort of coding language. You can figure out how it works by playing with it. It works very well if you give an AI an example and ask it to make you a workout.
+You declare what you want to do in plain text. Write _jumping jacks | 30s_ to do 30 seconds of jumping jacks, or _jumping jacks | 30_ to do 30 of them. You can learn more by playing with it. It works very well if you give an AI an example and ask it to make you a workout.
 
-It's free, works nicely on phone and laptop, and I made sure the audio doesn't interfere with the radio, if you are also playing that.
+It's free, works nicely on phone and laptop, and I made sure the audio doesn't interfere with your phone's other audio, so you can play the radio (or spotify).
 
 My own experience: very good, probably excellent, the best of the two workout timers I have used.

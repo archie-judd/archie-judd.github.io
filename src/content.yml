@@ -20,4 +20,4 @@ posts:
     title: My declarative workout timer
     slug:
     subtitle:
-    filepath: src/content/posts/workout-timer.md
+    filepath: src/content/posts/declarative-workout-timer.md
