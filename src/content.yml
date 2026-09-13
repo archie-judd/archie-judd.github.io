@@ -17,7 +17,7 @@ posts:
     subtitle:
     filepath: src/content/posts/i-saw-an-octopus.md
   - date: 2026-09-13
-    title: My declarative workout timer
+    title: My superlative, declarative workout timer
     slug:
     subtitle:
-    filepath: src/content/posts/declarative-workout-timer.md
+    filepath: src/content/posts/workout-timer.md

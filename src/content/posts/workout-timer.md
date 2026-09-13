@@ -18,8 +18,6 @@ So, I put my fitness regimen on hold for another week and decided to make one:
   <figcaption><a href="/workout-timer/" target="_blank">Open in a new tab</a></figcaption>
 </figure>
 
-You declare what you want to do in plain text. Write _jumping jacks | 30s_ to do 30 seconds of jumping jacks, or _jumping jacks | 30_ to do 30 of them. You can learn more by playing with it. It works very well if you give an AI an example and ask it to make you a workout.
-
-It's free, works nicely on phone and laptop, and I made sure the audio doesn't interfere with your phone's other audio, so you can play the radio (or spotify).
+I can type in what I want (_jumping jacks | 30s_ for thirty seconds of them, _jumping jacks | 30_ for thirty of them), press "Start", and it barks me through my workout. It will save your workout on reload, you can add multiple, and it won't interfere with any radio or Spotify. Give it a go if you'd like. I'd be thrilled if someone used it.
 
 My own experience: very good, probably excellent, the best of the two workout timers I have used.
