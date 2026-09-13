@@ -266,6 +266,18 @@ img {
   margin: 20px 0;
 }
 
+.content-body a,
+.content-body a:visited {
+  color: #3d2317;
+  text-decoration: none;
+  border-bottom: 1px solid #b8a898;
+  transition: border-color 0.3s ease;
+}
+
+.content-body a:hover {
+  border-bottom-color: #3d2317;
+}
+
 .content-body ul,
 .content-body ol {
   margin: 20px 0;
