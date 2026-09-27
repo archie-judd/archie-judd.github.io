@@ -26,6 +26,7 @@ Rest | 10s
 Push-ups | 45s // chest to floor
 Rest | 30s
 Lunges | 12 | each side
+Rest | 30s
 
 ## Cool Down
 Stretching | 2m`;
