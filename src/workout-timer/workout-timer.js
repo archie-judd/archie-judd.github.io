@@ -22,10 +22,10 @@ const DEFAULT_WORKOUT = `# My Workout
 Jumping Jacks | 30s
 Rest | 10s
 
-## Main Set
+## Main Set | 3
 Push-ups | 45s // chest to floor
 Rest | 30s
-Lunges | 60 | each side
+Lunges | 12 | each side
 
 ## Cool Down
 Stretching | 2m`;
@@ -85,6 +85,7 @@ Stretching | 2m`;
  * @typedef {Object} ParsedHeader
  * @property {"header"} type
  * @property {string} name
+ * @property {number} repeat
  */
 
 /**
@@ -109,7 +110,7 @@ Stretching | 2m`;
  * @typedef {Object} ParsedError
  * @property {"error"} type
  * @property {string} msg
- * @property {"lineFormat"|"duration"|"modifier"} [kind]
+ * @property {"lineFormat"|"duration"|"modifier"|"repeat"} [kind]
  * @property {"rest" | "exercise" | null} stepType
  */
 
@@ -259,6 +260,30 @@ const highlightExerciseOrRestLine = (line, parsed) => {
 };
 
 /**
+ * @param {string} line
+ * @param {ParsedHeader | ParsedError} parsed
+ * @returns {string}
+ */
+const highlightHeaderLine = (line, parsed) => {
+  const pipeIndex = line.indexOf("|");
+  if (pipeIndex < 0) {
+    return `<span class="syntax-section">${escapeHtml(line)}</span>`;
+  }
+
+  const repeatClass =
+    parsed.type === "error" ? "syntax-error" : "syntax-modifier";
+
+  let result = `<span class="syntax-section">${escapeHtml(
+    line.substring(0, pipeIndex),
+  )}</span>`;
+  result += `<span class="syntax-separator">|</span>`;
+  result += `<span class="${repeatClass}">${escapeHtml(
+    line.substring(pipeIndex + 1),
+  )}</span>`;
+  return result;
+};
+
+/**
  * Highlight a single line of workout text.
  * @param {string} line
  * @param {boolean} isCursorLine - true if the cursor is on this line (suppresses error styling)
@@ -276,7 +301,10 @@ const highlightLine = (line, isCursorLine, lineIndex) => {
     return `<span class="syntax-header">${escapeHtml(line)}</span>`;
   }
   if (parsed.type === "header") {
-    return `<span class="syntax-section">${escapeHtml(line)}</span>`;
+    return highlightHeaderLine(line, parsed);
+  }
+  if (parsed.type === "error" && parsed.kind === "repeat") {
+    return highlightHeaderLine(line, parsed);
   }
   if (parsed.type === "error" && parsed.kind == "lineFormat") {
     if (isCursorLine) return escapeHtml(line);
@@ -520,7 +548,8 @@ const parseLine = (line, lineIndex = 1) => {
     const hashMatch = trimmed.match(/^(#+)\s*(.*)/);
     if (!hashMatch) return { type: "empty" };
     const hashes = hashMatch[1];
-    const name = hashMatch[2].trim();
+    const headerParts = hashMatch[2].split("|").map((s) => s.trim());
+    const name = headerParts[0];
 
     if (hashes.length > 2) {
       return {
@@ -540,6 +569,15 @@ const parseLine = (line, lineIndex = 1) => {
       };
     }
 
+    if (headerParts.length > 2) {
+      return {
+        type: "error",
+        msg: `Expected 1-2 parts, got ${headerParts.length}`,
+        kind: "lineFormat",
+        stepType: null,
+      };
+    }
+
     if (hashes.length === 1) {
       if (lineIndex !== 0) {
         return {
@@ -549,10 +587,32 @@ const parseLine = (line, lineIndex = 1) => {
           stepType: null,
         };
       }
+      if (headerParts.length > 1) {
+        return {
+          type: "error",
+          msg: `Title (#) cannot have a repeat count. Use ## for repeated sections`,
+          kind: "lineFormat",
+          stepType: null,
+        };
+      }
       return { type: "title", name };
     }
 
-    return { type: "header", name };
+    let repeat = 1;
+    if (headerParts.length === 2) {
+      const repeatStr = headerParts[1];
+      if (!/^\d+$/.test(repeatStr) || parseInt(repeatStr) < 1) {
+        return {
+          type: "error",
+          msg: `Invalid repeat count: "${repeatStr}". Expected a whole number of 1 or more, like "## Main Set | 3"`,
+          kind: "repeat",
+          stepType: null,
+        };
+      }
+      repeat = parseInt(repeatStr);
+    }
+
+    return { type: "header", name, repeat };
   }
 
   const commentIndex = line.indexOf("//");
@@ -710,6 +770,21 @@ const parseWorkout = (text) => {
   let title = null;
   /** @type {string | null} */
   let currentSection = null;
+  let currentSectionRepeat = 1;
+  /** @type {(Exercise | Transition | Rest)[]} */
+  let sectionSteps = [];
+
+  const flushSection = () => {
+    if (currentSectionRepeat === 1) {
+      steps.push(...sectionSteps);
+    } else {
+      for (let round = 1; round <= currentSectionRepeat; round++) {
+        const section = `${currentSection} ${round}`;
+        steps.push(...sectionSteps.map((step) => ({ ...step, section })));
+      }
+    }
+    sectionSteps = [];
+  };
 
   lines.forEach((line, index) => {
     const parsed = parseLine(line, index);
@@ -719,16 +794,19 @@ const parseWorkout = (text) => {
       return;
     }
     if (parsed.type === "header") {
+      flushSection();
       currentSection = parsed.name;
+      currentSectionRepeat = parsed.repeat;
       return;
     }
 
     try {
-      steps.push(...expandLineToSteps(line, index, currentSection));
+      sectionSteps.push(...expandLineToSteps(line, index, currentSection));
     } catch (error) {
       errors.push(`Line ${index + 1}: ${error.message}`);
     }
   });
+  flushSection();
 
   if (errors.length > 0) throw new Error(errors.join("\n"));
   return { title, steps };
